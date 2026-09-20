@@ -106,8 +106,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-ivory shadow-[0_4px_20px_rgba(23,56,42,0.04)]">
-      <div className="mx-auto flex h-[78px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-14">
-        {/* LOGO */}
+      <div className="relative mx-auto flex h-[78px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-14">
+
+        {/* =========================
+            LOGO
+        ========================= */}
+
         <a
           href="/"
           className="group flex items-center font-display text-[28px] font-semibold tracking-[-0.04em] text-forest"
@@ -118,29 +122,35 @@ export default function Navbar() {
           </span>
         </a>
 
-        {/* DESKTOP NAV */}
-        <nav className="hidden items-center gap-7 lg:flex">
-          {menuItems.map((item) => (
-            <a
-              key={item.key}
-              href={item.href}
-              className="group relative text-[14px] font-medium text-forest/70 transition-colors duration-300 hover:text-forest"
-            >
-              {t.nav[item.key]}
+        {/* =========================
+            DESKTOP NAVIGATION
+        ========================= */}
 
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
-            </a>
-          ))}
-        </nav>
+        {/* DESKTOP NAVIGATION */}
+<nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-forest/8 bg-white/45 p-1.5 backdrop-blur-md lg:flex">
+  {menuItems.map((item) => (
+    <a
+      key={item.key}
+      href={item.href}
+      className="cursor-pointer rounded-full px-4 py-2 text-[13px] font-medium text-forest/60 transition-all duration-300 hover:bg-sage/65 hover:text-forest"
+    >
+      {t.nav[item.key]}
+    </a>
+  ))}
+</nav>
 
-        {/* DESKTOP ACTIONS */}
-        <div className="hidden items-center gap-4 lg:flex">
+        {/* =========================
+            DESKTOP ACTIONS
+        ========================= */}
+
+        <div className="hidden items-center gap-3 lg:flex">
+
           {/* LANGUAGE */}
-          <div className="flex items-center rounded-full bg-forest/5 p-1">
+          <div className="flex items-center rounded-full border border-forest/8 bg-white/45 p-1 backdrop-blur-md">
             <button
               type="button"
               onClick={() => setLanguage("id")}
-              className={`rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-[0.08em] transition-all ${
+              className={`cursor-pointer rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-[0.08em] transition-all ${
                 language === "id"
                   ? "bg-forest text-ivory shadow-sm"
                   : "text-forest/45 hover:text-forest"
@@ -152,7 +162,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-[0.08em] transition-all ${
+              className={`cursor-pointer rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-[0.08em] transition-all ${
                 language === "en"
                   ? "bg-forest text-ivory shadow-sm"
                   : "text-forest/45 hover:text-forest"
@@ -168,12 +178,13 @@ export default function Navbar() {
               ref={accountRef}
               className="relative"
             >
+              {/* ACCOUNT BUTTON */}
               <button
                 type="button"
                 onClick={() =>
                   setAccountOpen(!accountOpen)
                 }
-                className="flex items-center gap-3 rounded-full bg-white px-3 py-2 shadow-[0_5px_20px_rgba(23,56,42,0.06)] transition hover:shadow-[0_8px_25px_rgba(23,56,42,0.1)]"
+                className="group flex cursor-pointer items-center gap-2.5 rounded-full border border-forest/8 bg-white px-2.5 py-2 shadow-[0_5px_20px_rgba(23,56,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-forest/15 hover:shadow-[0_10px_28px_rgba(23,56,42,0.1)]"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-forest text-xs font-semibold text-ivory">
                   {firstName.charAt(0).toUpperCase()}
@@ -183,17 +194,13 @@ export default function Navbar() {
                   {firstName}
                 </span>
 
-                <span
-                  className={`text-xs text-forest/40 transition-transform ${
-                    accountOpen ? "rotate-180" : ""
-                  }`}
-                >
-                  ↓
-                </span>
+                
               </button>
 
+              {/* ACCOUNT DROPDOWN */}
               {accountOpen && (
-                <div className="absolute right-0 top-[calc(100%+10px)] w-64 overflow-hidden rounded-2xl bg-white p-2 shadow-[0_18px_45px_rgba(23,56,42,0.12)]">
+                <div className="absolute right-0 top-[calc(100%+10px)] w-64 overflow-hidden rounded-2xl border border-forest/5 bg-white p-2 shadow-[0_18px_45px_rgba(23,56,42,0.12)]">
+
                   {/* ACCOUNT INFO */}
                   <div className="rounded-xl bg-ivory px-4 py-3">
                     <p className="text-sm font-semibold text-forest">
@@ -211,12 +218,11 @@ export default function Navbar() {
                     onClick={() =>
                       setAccountOpen(false)
                     }
-                    className="mt-1 flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-forest transition hover:bg-sage/40"
+                    className="mt-1 flex cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-forest transition hover:bg-sage/40"
                   >
                     <span>My JCWF</span>
-                    <span className="text-forest/35">
-                      →
-                    </span>
+
+                    
                   </a>
 
                   {/* LOGOUT */}
@@ -224,7 +230,7 @@ export default function Navbar() {
                     type="button"
                     onClick={handleLogout}
                     disabled={loggingOut}
-                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                    className="flex w-full cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span>
                       {loggingOut
@@ -232,33 +238,34 @@ export default function Navbar() {
                         : "Logout"}
                     </span>
 
-                    <span>↗</span>
+                    
                   </button>
                 </div>
               )}
             </div>
           ) : (
+            /* REGISTER BUTTON */
             <a
-              href="#register"
-              className="group inline-flex items-center gap-3 rounded-full bg-forest px-5 py-3 text-[13px] font-semibold text-ivory shadow-[0_8px_25px_rgba(23,56,42,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest hover:shadow-[0_10px_28px_rgba(200,155,60,0.2)]"
+              href="/register"
+              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-forest px-6 py-3 text-[13px] font-semibold text-ivory shadow-[0_8px_25px_rgba(23,56,42,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest hover:shadow-[0_10px_28px_rgba(200,155,60,0.2)]"
             >
               {t.nav.register}
-
-              <span className="transition-transform duration-300 group-hover:translate-x-1">
-                →
-              </span>
             </a>
           )}
         </div>
 
-        {/* MOBILE ACTIONS */}
+        {/* =========================
+            MOBILE ACTIONS
+        ========================= */}
+
         <div className="flex items-center gap-2 lg:hidden">
+
           {/* LANGUAGE */}
           <div className="flex items-center rounded-full bg-forest/5 p-1">
             <button
               type="button"
               onClick={() => setLanguage("id")}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] transition-all ${
+              className={`cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] transition-all ${
                 language === "id"
                   ? "bg-forest text-ivory"
                   : "text-forest/45"
@@ -270,7 +277,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] transition-all ${
+              className={`cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] transition-all ${
                 language === "en"
                   ? "bg-forest text-ivory"
                   : "text-forest/45"
@@ -285,7 +292,7 @@ export default function Navbar() {
             <a
               href="/my"
               aria-label="My JCWF"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-forest text-xs font-semibold text-ivory"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-forest text-xs font-semibold text-ivory transition-transform duration-300 hover:scale-105"
             >
               {firstName.charAt(0).toUpperCase()}
             </a>
@@ -296,7 +303,7 @@ export default function Navbar() {
             type="button"
             aria-label="Buka menu"
             onClick={() => setIsOpen(!isOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/5 transition-colors hover:bg-forest/10"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-forest/5 transition-colors hover:bg-forest/10"
           >
             <span className="flex flex-col gap-1.5">
               <span className="block h-[1.5px] w-4 bg-forest" />
@@ -306,7 +313,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* =========================
+          MOBILE MENU
+      ========================= */}
+
       <div
         className={`overflow-hidden transition-all duration-300 lg:hidden ${
           isOpen ? "max-h-[520px]" : "max-h-0"
@@ -314,12 +324,13 @@ export default function Navbar() {
       >
         <nav className="mx-6 mb-4 rounded-3xl bg-white p-4 shadow-[0_12px_35px_rgba(23,56,42,0.08)] md:mx-10">
           <div className="flex flex-col">
+
             {menuItems.map((item) => (
               <a
                 key={item.key}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="rounded-2xl px-4 py-3 text-sm text-forest/70 transition-colors hover:bg-sage/50 hover:text-forest"
+                className="cursor-pointer rounded-2xl px-4 py-3 text-sm text-forest/70 transition-colors hover:bg-sage/50 hover:text-forest"
               >
                 {t.nav[item.key]}
               </a>
@@ -332,9 +343,9 @@ export default function Navbar() {
                 <a
                   href="/my"
                   onClick={() => setIsOpen(false)}
-                  className="rounded-2xl bg-forest px-4 py-3 text-center text-sm font-semibold text-ivory"
+                  className="cursor-pointer rounded-2xl bg-forest px-4 py-3 text-center text-sm font-semibold text-ivory"
                 >
-                  My JCWF →
+                  My JCWF
                 </a>
 
                 <button
@@ -344,7 +355,7 @@ export default function Navbar() {
                     handleLogout();
                   }}
                   disabled={loggingOut}
-                  className="mt-2 rounded-2xl px-4 py-3 text-center text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                  className="mt-2 cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loggingOut
                     ? "Logging out..."
@@ -353,11 +364,11 @@ export default function Navbar() {
               </>
             ) : (
               <a
-                href="#register"
+                href="/register"
                 onClick={() => setIsOpen(false)}
-                className="mt-2 rounded-2xl bg-forest px-4 py-3 text-center text-sm font-semibold text-ivory"
+                className="mt-2 cursor-pointer rounded-2xl bg-forest px-4 py-3 text-center text-sm font-semibold text-ivory"
               >
-                {t.nav.register} →
+                {t.nav.register}
               </a>
             )}
           </div>

@@ -74,6 +74,10 @@ export default function ActivityDetailPage() {
   const [errorMessage, setErrorMessage] =
     useState("");
 
+  // =========================
+  // FETCH ACTIVITY
+  // =========================
+
   useEffect(() => {
     async function fetchActivity() {
       try {
@@ -131,6 +135,10 @@ export default function ActivityDetailPage() {
     }
   }, [slug]);
 
+  // =========================
+  // BOOK ACTIVITY
+  // =========================
+
   async function handleBooking() {
     if (!activity) return;
 
@@ -171,8 +179,6 @@ export default function ActivityDetailPage() {
         );
       }
 
-      // Booking berhasil dibuat.
-      // Lanjut ke halaman checkout.
       router.push(
         `/activities/${activity.slug}/checkout?booking=${data.booking.id}`
       );
@@ -192,38 +198,66 @@ export default function ActivityDetailPage() {
     }
   }
 
+  // =========================
+  // LOADING
+  // =========================
+
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F8F7F3]">
+      <main className="min-h-screen bg-ivory">
         <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6">
-          <p className="text-sm text-black/50">
-            Loading activity...
-          </p>
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-forest/15 border-t-forest" />
+            <p className="mt-4 text-sm text-forest/45">
+              Loading activity...
+            </p>
+          </div>
         </div>
       </main>
     );
   }
 
+  // =========================
+  // NOT FOUND
+  // =========================
+
   if (!activity) {
     return (
-      <main className="min-h-screen bg-[#F8F7F3]">
-        <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6 text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-black/40">
+      <main className="min-h-screen bg-ivory">
+        <header className="flex items-center justify-between px-6 py-6 md:px-10 lg:px-14">
+          <Link
+            href="/"
+            className="font-display text-[28px] font-semibold tracking-[-0.04em] text-forest"
+          >
+            JCWF<span className="text-gold">.</span>
+          </Link>
+
+          <Link
+            href="/activities"
+            className="inline-flex items-center gap-2 text-sm font-medium text-forest/60 transition-colors hover:text-forest"
+          >
+            <span aria-hidden="true">←</span>
+            Back
+          </Link>
+        </header>
+
+        <div className="mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
             Activity
           </p>
 
-          <h1 className="text-3xl font-semibold tracking-tight text-[#151515]">
+          <h1 className="mt-4 font-display text-4xl tracking-[-0.03em] text-forest md:text-5xl">
             Activity tidak ditemukan
           </h1>
 
-          <p className="mt-3 max-w-md text-sm leading-6 text-black/50">
+          <p className="mt-4 max-w-md text-sm leading-6 text-forest/50">
             {errorMessage ||
               "Activity yang kamu cari tidak tersedia."}
           </p>
 
           <Link
             href="/activities"
-            className="mt-8 inline-flex items-center rounded-full bg-[#151515] px-6 py-3 text-sm font-medium text-white transition hover:opacity-85"
+            className="mt-8 inline-flex items-center rounded-full bg-forest px-6 py-3.5 text-sm font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest"
           >
             Kembali ke Activities
           </Link>
@@ -241,135 +275,175 @@ export default function ActivityDetailPage() {
     activity.price * quantity;
 
   return (
-    <main className="min-h-screen bg-[#F8F7F3] text-[#151515]">
-      {/* Header */}
-      <header className="border-b border-black/10 bg-[#F8F7F3]">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
+    <main className="min-h-screen bg-ivory text-forest">
+
+      {/* =========================
+          HEADER
+      ========================= */}
+
+      <header className="border-b border-forest/8 bg-ivory">
+        <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-14">
+
           <Link
             href="/activities"
-            className="text-sm font-medium text-black/60 transition hover:text-black"
+            className="inline-flex items-center gap-2 text-sm font-medium text-forest/55 transition-colors hover:text-forest"
           >
-            ← Back to Activities
+            <span
+              aria-hidden="true"
+              className="text-base"
+            >
+              ←
+            </span>
+
+            <span>Back</span>
           </Link>
 
           <Link
             href="/my"
-            className="text-sm font-medium text-black/60 transition hover:text-black"
+            className="rounded-full border border-forest/10 bg-white/60 px-5 py-2.5 text-xs font-semibold text-forest transition-all duration-300 hover:bg-sage"
           >
             My Plan
           </Link>
         </div>
       </header>
 
-      {/* Main */}
-      <section className="mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-16">
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-          {/* Image */}
-          <div className="overflow-hidden rounded-[28px] bg-black/5">
-            <div className="aspect-[4/3] w-full">
+      {/* =========================
+          HERO
+      ========================= */}
+
+      <section className="mx-auto max-w-[1440px] px-6 pb-20 pt-8 md:px-10 md:pb-28 md:pt-12 lg:px-14">
+
+        <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14 xl:gap-20">
+
+          {/* =========================
+              IMAGE
+          ========================= */}
+
+          <div className="relative overflow-hidden rounded-[2rem] bg-sage md:rounded-[2.5rem]">
+
+            <div className="aspect-[4/3] w-full md:aspect-[1.08/1] lg:aspect-[1/1.03]">
               <img
                 src={image}
                 alt={activity.title}
                 className="h-full w-full object-cover"
               />
             </div>
+
+            {/* IMAGE CATEGORY */}
+            <div className="absolute left-5 top-5 md:left-7 md:top-7">
+              <span className="rounded-full bg-ivory/90 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-forest shadow-[0_6px_20px_rgba(23,56,42,0.08)] backdrop-blur-md">
+                {activity.category}
+              </span>
+            </div>
           </div>
 
-          {/* Information */}
-          <div className="lg:pt-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black/40">
-              {activity.category}
+          {/* =========================
+              INFORMATION
+          ========================= */}
+
+          <div className="flex flex-col justify-center lg:py-8">
+
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              JCWF Activity
             </p>
 
-            <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="mt-4 max-w-xl font-display text-[clamp(2.8rem,5vw,5.5rem)] font-medium leading-[0.92] tracking-[-0.05em] text-forest">
               {activity.title}
             </h1>
 
             {activity.description && (
-              <p className="mt-6 max-w-xl text-base leading-7 text-black/60">
+              <p className="mt-6 max-w-xl text-sm leading-7 text-forest/55 md:text-[15px]">
                 {activity.description}
               </p>
             )}
 
-            {/* Details */}
-            <div className="mt-8 divide-y divide-black/10 border-y border-black/10">
-              <div className="flex items-center justify-between gap-6 py-5">
-                <span className="text-sm text-black/40">
-                  Date
-                </span>
+            {/* =========================
+                DETAILS
+            ========================= */}
 
-                <span className="text-right text-sm font-medium">
-                  {formatDate(
-                    activity.event_date
-                  )}
-                </span>
-              </div>
+            <div className="mt-8 border-y border-forest/10">
 
-              <div className="flex items-center justify-between gap-6 py-5">
-                <span className="text-sm text-black/40">
-                  Time
-                </span>
+              {/* DATE */}
+              <div className="flex items-start justify-between gap-6 border-b border-forest/10 py-5">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/35">
+                    Date
+                  </p>
 
-                <span className="text-right text-sm font-medium">
-                  {formatTime(
-                    activity.start_time
-                  )}{" "}
-                  —{" "}
-                  {formatTime(
-                    activity.end_time
-                  )}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-6 py-5">
-                <span className="text-sm text-black/40">
-                  Location
-                </span>
-
-                <span className="text-right text-sm font-medium">
-                  {activity.location}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-6 py-5">
-                <span className="text-sm text-black/40">
-                  Price
-                </span>
-
-                <span className="text-right text-sm font-semibold">
-                  {formatPrice(
-                    activity.price
-                  )}
-                </span>
-              </div>
-
-              {activity.capacity !== null && (
-                <div className="flex items-center justify-between gap-6 py-5">
-                  <span className="text-sm text-black/40">
-                    Capacity
-                  </span>
-
-                  <span className="text-right text-sm font-medium">
-                    {activity.capacity} peserta
-                  </span>
+                  <p className="mt-1.5 text-sm font-medium text-forest">
+                    {formatDate(
+                      activity.event_date
+                    )}
+                  </p>
                 </div>
-              )}
+
+                <div className="text-right">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/35">
+                    Time
+                  </p>
+
+                  <p className="mt-1.5 text-sm font-medium text-forest">
+                    {formatTime(
+                      activity.start_time
+                    )}{" "}
+                    —{" "}
+                    {formatTime(
+                      activity.end_time
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* LOCATION */}
+              <div className="flex items-start justify-between gap-6 py-5">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/35">
+                    Location
+                  </p>
+
+                  <p className="mt-1.5 max-w-sm text-sm font-medium leading-5 text-forest">
+                    {activity.location}
+                  </p>
+                </div>
+
+                <div className="shrink-0 text-right">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/35">
+                    Price
+                  </p>
+
+                  <p className="mt-1.5 text-sm font-semibold text-forest">
+                    {formatPrice(
+                      activity.price
+                    )}
+                  </p>
+                </div>
+              </div>
+
             </div>
 
-            {/* Booking */}
-            <div className="mt-8 rounded-[24px] border border-black/10 bg-white p-6">
-              <div className="flex items-center justify-between">
+            {/* =========================
+                BOOKING
+            ========================= */}
+
+            <div className="mt-8 rounded-[1.75rem] bg-sage/55 p-5 md:p-6">
+
+              <div className="flex items-center justify-between gap-5">
+
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-semibold text-forest">
                     Number of tickets
                   </p>
 
-                  <p className="mt-1 text-xs text-black/40">
-                    Maksimal sesuai kapasitas yang tersedia.
+                  <p className="mt-1 text-xs leading-5 text-forest/45">
+                    {activity.capacity !== null
+                      ? `Up to ${activity.capacity} participants`
+                      : "Choose the number of tickets you need."}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* QUANTITY */}
+                <div className="flex shrink-0 items-center rounded-full border border-forest/10 bg-white p-1">
+
                   <button
                     type="button"
                     onClick={() =>
@@ -381,12 +455,13 @@ export default function ActivityDetailPage() {
                       )
                     }
                     disabled={booking}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-lg transition hover:bg-black/5 disabled:opacity-40"
+                    aria-label="Decrease quantity"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-lg text-forest/60 transition hover:bg-sage hover:text-forest disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     −
                   </button>
 
-                  <span className="w-6 text-center text-sm font-semibold">
+                  <span className="w-8 text-center text-sm font-semibold text-forest">
                     {quantity}
                   </span>
 
@@ -410,20 +485,24 @@ export default function ActivityDetailPage() {
                         quantity >=
                           activity.capacity)
                     }
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-lg transition hover:bg-black/5 disabled:opacity-40"
+                    aria-label="Increase quantity"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-lg text-forest/60 transition hover:bg-sage hover:text-forest disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     +
                   </button>
+
                 </div>
               </div>
 
-              <div className="mt-6 flex items-end justify-between border-t border-black/10 pt-5">
+              {/* TOTAL + BUTTON */}
+              <div className="mt-5 flex flex-col gap-4 border-t border-forest/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
+
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-black/40">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/40">
                     Total
                   </p>
 
-                  <p className="mt-1 text-xl font-semibold">
+                  <p className="mt-1 font-display text-2xl tracking-[-0.02em] text-forest">
                     {formatPrice(
                       totalPrice
                     )}
@@ -434,20 +513,24 @@ export default function ActivityDetailPage() {
                   type="button"
                   onClick={handleBooking}
                   disabled={booking}
-                  className="rounded-full bg-[#151515] px-7 py-3.5 text-sm font-medium text-white transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-forest px-7 py-3.5 text-sm font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
                   {booking
                     ? "Creating booking..."
-                    : "Book Now →"}
+                    : "Book Now"}
                 </button>
+
               </div>
 
+              {/* ERROR */}
               {errorMessage && (
-                <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm leading-5 text-red-600">
                   {errorMessage}
                 </div>
               )}
+
             </div>
+
           </div>
         </div>
       </section>

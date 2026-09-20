@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type Activity = {
@@ -13,15 +13,17 @@ type Activity = {
 export default function ActivitiesSection() {
   const { t } = useLanguage();
 
-  const [activitiesData, setActivitiesData] = useState<
-    Activity[]
-  >([]);
+  const [activitiesData, setActivitiesData] = useState<Activity[]>(
+    [],
+  );
 
-  const [joiningSlug, setJoiningSlug] = useState<
-    string | null
-  >(null);
+  const [joiningSlug, setJoiningSlug] = useState<string | null>(
+    null,
+  );
 
   const [joinMessage, setJoinMessage] = useState("");
+
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const activities = [
     {
@@ -53,46 +55,32 @@ export default function ActivitiesSection() {
   useEffect(() => {
     async function loadActivities() {
       try {
-        const response = await fetch(
-          "/api/activities"
-        );
+        const response = await fetch("/api/activities");
 
         if (!response.ok) {
-          throw new Error(
-            "Failed to load activities."
-          );
+          throw new Error("Failed to load activities.");
         }
 
         const data = await response.json();
 
-        setActivitiesData(
-          data.activities ?? []
-        );
+        setActivitiesData(data.activities ?? []);
       } catch (error) {
-        console.error(
-          "LOAD ACTIVITIES ERROR:",
-          error
-        );
+        console.error("LOAD ACTIVITIES ERROR:", error);
       }
     }
 
     loadActivities();
   }, []);
 
-  async function handleJoinActivity(
-    slug: string
-  ) {
+  async function handleJoinActivity(slug: string) {
     setJoinMessage("");
 
-    const activity =
-      activitiesData.find(
-        (item) => item.slug === slug
-      );
+    const activity = activitiesData.find(
+      (item) => item.slug === slug,
+    );
 
     if (!activity) {
-      setJoinMessage(
-        "Activity belum tersedia."
-      );
+      setJoinMessage("Activity belum tersedia.");
       return;
     }
 
@@ -109,7 +97,7 @@ export default function ActivitiesSection() {
           body: JSON.stringify({
             activityId: activity.id,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -123,7 +111,7 @@ export default function ActivitiesSection() {
       if (response.status === 409) {
         setJoinMessage(
           data.message ||
-            "Kamu sudah terdaftar di activity ini."
+            "Kamu sudah terdaftar di activity ini.",
         );
         return;
       }
@@ -131,46 +119,53 @@ export default function ActivitiesSection() {
       if (!response.ok) {
         setJoinMessage(
           data.message ||
-            "Gagal bergabung ke activity."
+            "Gagal bergabung ke activity.",
         );
         return;
       }
 
       setJoinMessage(
-        "Activity berhasil ditambahkan ke My Plan."
+        "Activity berhasil ditambahkan ke My Plan.",
       );
     } catch (error) {
-      console.error(
-        "JOIN ACTIVITY ERROR:",
-        error
-      );
+      console.error("JOIN ACTIVITY ERROR:", error);
 
       setJoinMessage(
-        "Terjadi kesalahan. Silakan coba lagi."
+        "Terjadi kesalahan. Silakan coba lagi.",
       );
     } finally {
       setJoiningSlug(null);
     }
   }
 
-  const featuredActivity = activities.find(
-    (activity) => activity.featured
-  );
+  function scrollActivities(direction: "left" | "right") {
+    if (!sliderRef.current) return;
 
-  const otherActivities =
-    activities.filter(
-      (activity) => !activity.featured
-    );
+    const amount =
+      sliderRef.current.clientWidth * 0.82;
+
+    sliderRef.current.scrollBy({
+      left:
+        direction === "right"
+          ? amount
+          : -amount,
+      behavior: "smooth",
+    });
+  }
 
   return (
     <section
       id="activities"
-      className="relative overflow-hidden bg-ivory py-20 md:py-28 lg:py-32"
+      className="relative overflow-hidden bg-[#f1eee4] py-20 md:py-28 lg:py-32"
     >
       <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
 
-        {/* HEADER */}
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
+
+        <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
+
           <div className="max-w-3xl">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
               {t.activities.eyebrow}
@@ -185,207 +180,230 @@ export default function ActivitiesSection() {
             </h2>
           </div>
 
-          <div className="max-w-sm md:pb-2">
-            <p className="text-sm leading-7 text-forest/60 md:text-[15px]">
+          {/* DESKTOP DESCRIPTION + VIEW ALL */}
+          <div className="flex max-w-md flex-col gap-5 md:items-end md:pb-2">
+            <p className="text-sm leading-7 text-forest/60 md:text-[15px] md:text-right">
               {t.activities.description}
             </p>
+
+           <a
+  href="/activities"
+  className="inline-flex w-fit items-center rounded-full border border-white/15 bg-[#A8B99F]/80 px-5 py-2.5 text-sm font-semibold text-forest shadow-[0_8px_25px_rgba(23,56,42,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-bg-[#8FA58A]/90 hover:shadow-[0_12px_30px_rgba(23,56,42,0.12)]"
+>
+  {t.activities.viewAll}
+</a>
           </div>
         </div>
 
-        {/* FEATURED + ACTIVITIES */}
-        <div className="mt-12 grid gap-4 lg:mt-16 lg:grid-cols-[1.35fr_0.65fr]">
+        {/* =====================================================
+            MOBILE SLIDER CONTROLS
+        ====================================================== */}
 
-          {/* FEATURED ACTIVITY */}
-          {featuredActivity && (
-            <article className="group relative min-h-[520px] overflow-hidden rounded-[2rem] bg-forest md:min-h-[620px]">
+        <div className="mt-7 flex items-center justify-between md:hidden">
 
-              {/* Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                style={{
-                  backgroundImage: `linear-gradient(
-                    180deg,
-                    rgba(23, 56, 42, 0.02) 20%,
-                    rgba(23, 56, 42, 0.18) 45%,
-                    rgba(23, 56, 42, 0.9) 100%
-                  ), url('${featuredActivity.image}')`,
-                }}
-              />
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-forest/40">
+            Swipe to explore
+          </p>
 
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 p-7 md:p-10 lg:p-12">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Previous activity"
+              onClick={() =>
+                scrollActivities("left")
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-forest/15 bg-ivory text-lg text-forest transition hover:bg-forest hover:text-ivory"
+            >
+              ‹
+            </button>
 
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-gold px-3 py-1.5 text-[10px] font-bold tracking-[0.15em] text-forest">
-                    {t.activities.items.morningReset.category}
-                  </span>
+            <button
+              type="button"
+              aria-label="Next activity"
+              onClick={() =>
+                scrollActivities("right")
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-forest/15 bg-ivory text-lg text-forest transition hover:bg-forest hover:text-ivory"
+            >
+              ›
+            </button>
+          </div>
+        </div>
 
-                  <span className="text-xs font-medium text-white/70">
-                    {t.activities.featuredLabel}
-                  </span>
-                </div>
+        {/* =====================================================
+            ACTIVITY SLIDER / GRID
+        ====================================================== */}
 
-                <h3 className="mt-5 max-w-2xl font-display text-4xl leading-[0.95] tracking-[-0.04em] text-white md:text-6xl">
-                  {t.activities.items.morningReset.title}
-                </h3>
+        <div
+          ref={sliderRef}
+          className="
+            mt-10
+            flex
+            snap-x
+            snap-mandatory
+            gap-4
+            overflow-x-auto
+            pb-3
+            scrollbar-none
+            md:mt-14
+            md:grid
+            md:grid-cols-2
+            md:overflow-visible
+            md:pb-0
+            lg:grid-cols-4
+          "
+        >
 
-                <p className="mt-5 max-w-xl text-sm leading-6 text-white/70 md:text-[15px]">
-                  {t.activities.items.morningReset.description}
-                </p>
+          {activities.map((activity) => {
+            const content =
+              t.activities.items[activity.key];
 
-                {/* Meta */}
-                <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-white/70">
-                  <span>
-                    <strong className="font-semibold text-white">
-                      {t.activities.items.morningReset.date}
-                    </strong>{" "}
-                    ·{" "}
-                    {t.activities.items.morningReset.time}
-                  </span>
+            return (
+              <article
+                key={activity.key}
+                className="
+                  group
+                  relative
+                  min-w-[82vw]
+                  snap-start
+                  overflow-hidden
+                  rounded-[1.8rem]
+                  bg-forest
+                  shadow-[0_12px_35px_rgba(23,56,42,0.08)]
+                  transition-transform
+                  duration-500
+                  md:min-w-0
+                  md:hover:-translate-y-1
+                "
+              >
 
-                  <span>
-                    {t.activities.items.morningReset.location}
-                  </span>
-                </div>
+                {/* =================================================
+                    IMAGE
+                ================================================== */}
 
-                {/* JOIN */}
-                <div className="mt-7 flex flex-wrap items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleJoinActivity(
-                        featuredActivity.slug
-                      )
-                    }
-                    disabled={
-                      joiningSlug !== null
-                    }
-                    className="group/join inline-flex items-center gap-3 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-forest transition-all duration-300 hover:-translate-y-0.5 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {joiningSlug ===
-                    featuredActivity.slug
-                      ? "Joining..."
-                      : "Join Activity"}
+                <div className="relative h-[360px] overflow-hidden">
 
-                    <span className="transition-transform duration-300 group-hover/join:translate-x-1">
-                      →
-                    </span>
-                  </button>
-
-                  {joinMessage && (
-                    <span className="text-xs text-white/70">
-                      {joinMessage}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Arrow */}
-              <div className="absolute right-7 top-7 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-lg text-forest shadow-lg backdrop-blur-sm transition-all duration-500 group-hover:rotate-45 group-hover:bg-gold md:right-10 md:top-10">
-                ↗
-              </div>
-            </article>
-          )}
-
-          {/* OTHER ACTIVITIES */}
-          <div className="grid gap-4">
-            {otherActivities.map((activity) => {
-              const content =
-                t.activities.items[activity.key];
-
-              return (
-                <article
-                  key={activity.key}
-                  className="group relative min-h-[260px] overflow-hidden rounded-[2rem] bg-sage md:min-h-[280px]"
-                >
-                  {/* Image */}
                   <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     style={{
                       backgroundImage: `linear-gradient(
                         180deg,
-                        rgba(23, 56, 42, 0.02) 10%,
-                        rgba(23, 56, 42, 0.78) 100%
+                        rgba(23, 56, 42, 0.02) 15%,
+                        rgba(23, 56, 42, 0.18) 40%,
+                        rgba(23, 56, 42, 0.94) 100%
                       ), url('${activity.image}')`,
                     }}
                   />
 
-                  {/* Content */}
-                  <div className="absolute inset-x-0 bottom-0 p-6 md:p-7">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-[10px] font-bold tracking-[0.16em] text-gold">
-                        {content.category}
-                      </span>
+                  {/* =================================================
+                      TOP LABEL
+                  ================================================== */}
 
-                      <span className="text-xs text-white/65">
-                        {content.date}
-                      </span>
-                    </div>
+                  <div className="absolute left-5 right-5 top-5 flex items-center justify-between gap-3">
 
-                    <h3 className="mt-2 font-display text-3xl leading-none tracking-[-0.03em] text-white md:text-4xl">
+                    <span className="rounded-full bg-gold px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] text-forest">
+                      {content.category}
+                    </span>
+
+                    {activity.featured && (
+                      <span className="rounded-full border border-white/25 bg-forest/35 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/80 backdrop-blur-md">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+
+                  {/* =================================================
+                      CONTENT
+                  ================================================== */}
+
+                  <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+
+                    <h3 className="font-display text-3xl leading-[0.95] tracking-[-0.035em] text-white md:text-[2rem]">
                       {content.title}
                     </h3>
 
-                    <div className="mt-3 flex items-center justify-between gap-4">
-                      <p className="max-w-sm text-xs leading-5 text-white/65">
-                        {content.description}
-                      </p>
+                    <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-white/65 md:text-xs">
+                      {content.description}
+                    </p>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleJoinActivity(
-                            activity.slug
-                          )
-                        }
-                        disabled={
-                          joiningSlug !== null
-                        }
-                        className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-white/85 px-4 text-xs font-semibold text-forest transition-all duration-300 hover:bg-gold disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {joiningSlug ===
-                        activity.slug
-                          ? "..."
-                          : "Join"}
+                    {/* META */}
+                    <div className="mt-4 border-t border-white/15 pt-4">
 
-                        <span className="transition-transform duration-300 group-hover:translate-x-1">
-                          →
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-white/65">
+
+                        <span>
+                          <strong className="font-semibold text-white">
+                            {content.date}
+                          </strong>
                         </span>
-                      </button>
+
+                        <span>
+                          {content.time}
+                        </span>
+
+                      </div>
+
+                      <p className="mt-1.5 truncate text-[10px] text-white/50">
+                        {content.location}
+                      </p>
                     </div>
+
+                    {/* JOIN */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleJoinActivity(
+                          activity.slug,
+                        )
+                      }
+                      disabled={
+                        joiningSlug !== null
+                      }
+                      className="
+                        mt-4
+                        flex
+                        w-full
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-ivory
+                        px-4
+                        py-3
+                        text-xs
+                        font-semibold
+                        text-forest
+                        transition-all
+                        duration-300
+                        hover:bg-gold
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
+                      "
+                    >
+                      {joiningSlug ===
+                      activity.slug
+                        ? "Joining..."
+                        : "Join Activity"}
+                    </button>
                   </div>
-                </article>
-              );
-            })}
-          </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
-        {/* BOTTOM CTA */}
-        <div className="mt-8 flex flex-col gap-5 rounded-[2rem] bg-sage/70 p-7 md:flex-row md:items-center md:justify-between md:p-8">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-              {t.activities.bottomDate}
-            </p>
+        {/* =====================================================
+            JOIN MESSAGE
+        ====================================================== */}
 
-            <p className="mt-2 font-display text-2xl tracking-[-0.02em] text-forest md:text-3xl">
-              {t.activities.bottomTitle}
-            </p>
+        {joinMessage && (
+          <div className="mt-5 text-center text-xs text-forest/60">
+            {joinMessage}
           </div>
+        )}
 
-          <a
-            href="/activities"
-            className="group inline-flex w-fit items-center gap-3 rounded-full bg-forest px-6 py-3.5 text-sm font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest"
-          >
-            {t.activities.viewAll}
-
-            <span className="transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
-          </a>
-        </div>
-
+        
+        
       </div>
     </section>
   );
 }
-

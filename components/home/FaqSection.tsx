@@ -10,13 +10,13 @@ export default function FaqSection() {
   return (
     <section
       id="faq"
-      className="relative overflow-hidden bg-ivory py-20 md:py-28 lg:py-32"
+      className="relative overflow-hidden bg-[#E8EBDD] py-20 md:py-28 lg:py-32"
     >
       <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
-
-        {/* HEADER */}
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-          <div>
+        {/* HEADER + FAQ */}
+        <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
+          {/* LEFT */}
+          <div className="lg:sticky lg:top-24 lg:self-start">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
               {t.faq.eyebrow}
             </p>
@@ -24,125 +24,117 @@ export default function FaqSection() {
             <h2 className="font-display text-[clamp(3rem,6vw,6rem)] font-medium leading-[0.92] tracking-[-0.05em] text-forest">
               {t.faq.titleLine1}
               <br />
-              <span className="text-gold">
-                {t.faq.titleLine2}
-              </span>
+              <span className="text-gold">{t.faq.titleLine2}</span>
             </h2>
+
+            <p className="mt-7 max-w-md text-sm leading-7 text-forest/60 md:text-[15px]">
+              {t.faq.description}
+            </p>
           </div>
 
-          <p className="max-w-md text-sm leading-7 text-forest/60 lg:pb-2 lg:text-[15px]">
-            {t.faq.description}
-          </p>
-        </div>
+          {/* RIGHT — FAQ LIST */}
+          <div className="border-t border-forest/10">
+            {t.faq.items.map((faq, index) => {
+              const isOpen = openIndex === index;
 
-        {/* FAQ */}
-        <div className="mt-12 max-w-5xl md:mt-16">
-          {t.faq.items.map((faq, index) => {
-            const isOpen = openIndex === index;
-
-            return (
-              <div
-                key={faq.question}
-                className="border-b border-forest/10 last:border-b-0"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenIndex(isOpen ? null : index)
-                  }
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left md:py-7"
-                  aria-expanded={isOpen}
-                >
-                  <span className="font-display text-xl tracking-[-0.02em] text-forest md:text-2xl">
-                    {faq.question}
-                  </span>
-
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-lg text-forest transition-transform duration-300 ${
-                      isOpen ? "rotate-45" : ""
-                    }`}
-                  >
-                    +
-                  </span>
-                </button>
-
+              return (
                 <div
-                  className={`grid transition-all duration-300 ${
-                    isOpen
-                      ? "grid-rows-[1fr] pb-6 opacity-100"
-                      : "grid-rows-[0fr] opacity-0"
+                  key={faq.question}
+                  className={`border-b border-forest/10 transition-colors duration-300 ${
+                    isOpen ? "bg-ivory/45" : "bg-transparent"
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <p className="max-w-3xl pr-12 text-sm leading-7 text-forest/55">
-                      {faq.answer}
-                    </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenIndex(isOpen ? null : index)
+                    }
+                    className="flex w-full items-center justify-between gap-5 px-4 py-5 text-left md:px-6 md:py-6"
+                    aria-expanded={isOpen}
+                  >
+                    <div className="flex min-w-0 items-start gap-4 md:gap-5">
+                      <span className="pt-1 text-[9px] font-semibold tracking-[0.15em] text-forest/30">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      <span className="font-display text-lg leading-tight tracking-[-0.02em] text-forest md:text-2xl">
+                        {faq.question}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest/10 text-lg leading-none text-forest transition-all duration-300 md:h-9 md:w-9 ${
+                        isOpen
+                          ? "rotate-45 bg-forest text-ivory"
+                          : "rotate-0"
+                      }`}
+                    >
+                      +
+                    </span>
+                  </button>
+
+                  <div
+                    className={`grid transition-all duration-300 ${
+                      isOpen
+                        ? "grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-4 pb-6 pl-12 md:px-6 md:pb-7 md:pl-[4.5rem]">
+                        <p className="max-w-2xl text-sm leading-6 text-forest/55 md:text-[15px] md:leading-7">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* FINAL CTA */}
         <div
           id="register"
-          className="relative mt-20 overflow-hidden rounded-[2.5rem] bg-forest p-8 md:mt-28 md:p-12 lg:p-16"
+          className="relative mt-16 overflow-hidden rounded-[2rem] bg-forest p-6 text-ivory md:mt-24 md:rounded-[2.5rem] md:p-10 lg:p-14"
         >
-          {/* Decorative circles */}
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-sage/5 blur-3xl" />
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
+            {/* COPY */}
+            <div className="max-w-4xl">
+              
 
-          {/* Parang decoration */}
-          <div className="pointer-events-none absolute right-[-20px] top-1/2 hidden -translate-y-1/2 rotate-[-18deg] opacity-[0.06] md:block">
-            <div className="grid grid-cols-4 gap-3">
-              {Array.from({ length: 20 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-24 w-14 rotate-45 rounded-[70%_12%_70%_12%] border-2 border-gold"
-                />
-              ))}
+              <h3 className="mt-4 font-display text-[clamp(2.8rem,6vw,5.5rem)] font-medium leading-[0.92] tracking-[-0.05em] text-white">
+                {t.faq.ctaTitleLine1}
+                <br />
+                <span className="text-gold">
+                  {t.faq.ctaTitleLine2}
+                </span>
+              </h3>
+
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-white/55 md:mt-6 md:text-[15px] md:leading-7">
+                {t.faq.ctaDescription}
+              </p>
             </div>
-          </div>
 
-          <div className="relative max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
-              {t.faq.ctaDate}
-            </p>
-
-            <h3 className="mt-5 font-display text-[clamp(3rem,6vw,5.5rem)] font-medium leading-[0.92] tracking-[-0.05em] text-white">
-              {t.faq.ctaTitleLine1}
-              <br />
-              <span className="text-gold">
-                {t.faq.ctaTitleLine2}
-              </span>
-            </h3>
-
-            <p className="mt-6 max-w-xl text-sm leading-7 text-white/55 md:text-[15px]">
-              {t.faq.ctaDescription}
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            {/* ACTIONS */}
+            <div className="flex flex-col gap-2.5 sm:flex-row lg:flex-col lg:min-w-[190px]">
               <a
                 href="/register"
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-gold px-7 py-4 text-sm font-semibold text-forest transition-all duration-300 hover:-translate-y-0.5 hover:bg-ivory"
+                className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3.5 text-sm font-semibold text-forest transition-all duration-300 hover:-translate-y-0.5 hover:bg-ivory"
               >
                 {t.faq.ctaRegister}
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
               </a>
 
               <a
                 href="#activities"
-                className="inline-flex items-center justify-center gap-3 rounded-full bg-white/10 px-7 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/15"
+                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.06] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/10"
               >
                 {t.faq.ctaExplore}
               </a>
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

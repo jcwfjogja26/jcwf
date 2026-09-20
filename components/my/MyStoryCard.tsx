@@ -12,51 +12,262 @@ type Story = {
   updatedAt: string;
 };
 
-function formatDate(dateString: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
+function formatStoryDate(date: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
-  }).format(new Date(dateString));
+  }).format(new Date(date));
 }
+
+/* =========================================================
+   ICONS
+========================================================= */
+
+function NotesIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="5" y="3.5" width="14" height="17" rx="2.5" />
+      <path d="M9 8h6" />
+      <path d="M9 12h6" />
+      <path d="M9 16h3" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function ChevronIcon({
+  open,
+}: {
+  open: boolean;
+}) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`transition-transform duration-300 ${
+        open ? "rotate-180" : ""
+      }`}
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="18" cy="5" r="2.2" />
+      <circle cx="6" cy="12" r="2.2" />
+      <circle cx="18" cy="19" r="2.2" />
+      <path d="m8 10.9 7.8-4.5" />
+      <path d="m8 13.1 7.8 4.5" />
+    </svg>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="8" y="8" width="11" height="11" rx="2" />
+      <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+    </svg>
+  );
+}
+
+function DeleteIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V4h6v3" />
+      <path d="m6 7 1 14h10l1-14" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function MyStoryCard() {
   const [stories, setStories] = useState<Story[]>([]);
-  const [reflection, setReflection] = useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [sharingId, setSharingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [error, setError] = useState("");
-  const [shareUrl, setShareUrl] = useState("");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sharing, setSharing] =
+    useState(false);
+
+  const [deleting, setDeleting] =
+    useState(false);
+
+  const [expanded, setExpanded] =
+    useState(false);
+
+  const [composerOpen, setComposerOpen] =
+    useState(false);
+
+  const [selectedStory, setSelectedStory] =
+    useState<Story | null>(null);
+
+  const [editingStoryId, setEditingStoryId] =
+    useState<string | null>(null);
+
+  const [reflection, setReflection] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [shareUrl, setShareUrl] =
+    useState("");
+
+  const [copied, setCopied] =
+    useState(false);
+
+  /* =======================================================
+     LOAD STORIES
+  ======================================================= */
 
   async function loadStories() {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch("/api/my-story", {
-        method: "GET",
-        cache: "no-store",
-      });
+      const response = await fetch(
+        "/api/my-story",
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Gagal mengambil My Stories."
+          data.message ||
+            "Gagal mengambil My Stories."
         );
       }
 
-      setStories(data.stories || []);
+      setStories(
+        Array.isArray(data.stories)
+          ? data.stories
+          : []
+      );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "LOAD MY STORIES ERROR:",
+        error
+      );
 
       setError(
         error instanceof Error
@@ -72,47 +283,29 @@ export default function MyStoryCard() {
     loadStories();
   }, []);
 
-  function handleNewStory() {
-    setReflection("");
-    setEditingId(null);
-    setShareUrl("");
-    setCopiedId(null);
-    setError("");
-    setShowForm(true);
-  }
+  /* =======================================================
+     CREATE STORY
+  ======================================================= */
 
-  function handleEdit(story: Story) {
-    setReflection(story.reflection);
-    setEditingId(story.id);
-    setShareUrl("");
-    setCopiedId(null);
-    setError("");
-    setShowForm(true);
-  }
-
-  function handleCancel() {
-    setReflection("");
-    setEditingId(null);
-    setShareUrl("");
-    setCopiedId(null);
-    setError("");
-    setShowForm(false);
-  }
-
-  async function handleSubmit(
+  async function handleCreateStory(
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const trimmedReflection = reflection.trim();
+    const value =
+      reflection.trim();
 
-    if (!trimmedReflection) {
-      setError("Tulis sedikit tentang pengalamanmu dulu.");
+    if (!value) {
+      setError(
+        "Tulis sedikit tentang pengalamanmu dulu."
+      );
       return;
     }
 
-    if (trimmedReflection.length > 1000) {
-      setError("Reflection maksimal 1000 karakter.");
+    if (value.length > 1000) {
+      setError(
+        "Story maksimal 1000 karakter."
+      );
       return;
     }
 
@@ -120,92 +313,211 @@ export default function MyStoryCard() {
       setSaving(true);
       setError("");
 
-      const response = await fetch("/api/my-story", {
-        method: editingId ? "PATCH" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          editingId
-            ? {
-                storyId: editingId,
-                reflection: trimmedReflection,
-              }
-            : {
-                reflection: trimmedReflection,
-              }
-        ),
-      });
+      const response =
+        await fetch("/api/my-story", {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            reflection: value,
+          }),
+        });
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Gagal menyimpan My Story."
+          data.message ||
+            "Gagal membuat story."
         );
       }
 
-      if (editingId) {
-        setStories((current) =>
-          current.map((story) =>
-            story.id === editingId ? data.story : story
-          )
-        );
-      } else {
-        setStories((current) => [
-          data.story,
-          ...current,
-        ]);
-      }
+      const newStory =
+        data.story as Story;
 
-      handleCancel();
+      setStories((current) => [
+        newStory,
+        ...current,
+      ]);
+
+      setReflection("");
+      setComposerOpen(false);
+
+      /*
+       * Automatically open the section
+       * after creating a story so the
+       * participant can immediately see it.
+       */
+      setExpanded(true);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "CREATE STORY ERROR:",
+        error
+      );
 
       setError(
         error instanceof Error
           ? error.message
-          : "Gagal menyimpan My Story."
+          : "Gagal membuat story."
       );
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDelete(storyId: string) {
-    const confirmed = window.confirm(
-      "Hapus story ini? Story yang dihapus tidak akan tampil lagi."
+  /* =======================================================
+     EDIT STORY
+  ======================================================= */
+
+  function startEditing(
+    story: Story
+  ) {
+    setSelectedStory(null);
+    setEditingStoryId(story.id);
+    setReflection(
+      story.reflection
     );
+    setError("");
+  }
+
+  async function handleEditStory(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    if (!editingStoryId) return;
+
+    const value =
+      reflection.trim();
+
+    if (!value) {
+      setError(
+        "Story tidak boleh kosong."
+      );
+      return;
+    }
+
+    if (value.length > 1000) {
+      setError(
+        "Story maksimal 1000 karakter."
+      );
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const response =
+        await fetch("/api/my-story", {
+          method: "PATCH",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            storyId:
+              editingStoryId,
+            reflection: value,
+          }),
+        });
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Gagal mengedit story."
+        );
+      }
+
+      const updatedStory =
+        data.story as Story;
+
+      setStories((current) =>
+        current.map((item) =>
+          item.id ===
+          updatedStory.id
+            ? updatedStory
+            : item
+        )
+      );
+
+      setEditingStoryId(null);
+      setReflection("");
+    } catch (error) {
+      console.error(
+        "EDIT STORY ERROR:",
+        error
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Gagal mengedit story."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /* =======================================================
+     DELETE STORY
+  ======================================================= */
+
+  async function handleDeleteStory(
+    story: Story
+  ) {
+    const confirmed =
+      window.confirm(
+        "Hapus story ini?"
+      );
 
     if (!confirmed) return;
 
     try {
-      setDeletingId(storyId);
+      setDeleting(true);
       setError("");
 
-      const response = await fetch("/api/my-story", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          storyId,
-        }),
-      });
+      const response =
+        await fetch("/api/my-story", {
+          method: "DELETE",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            storyId: story.id,
+          }),
+        });
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Gagal menghapus story."
+          data.message ||
+            "Gagal menghapus story."
         );
       }
 
       setStories((current) =>
-        current.filter((story) => story.id !== storyId)
+        current.filter(
+          (item) =>
+            item.id !== story.id
+        )
       );
+
+      setSelectedStory(null);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "DELETE STORY ERROR:",
+        error
+      );
 
       setError(
         error instanceof Error
@@ -213,31 +525,39 @@ export default function MyStoryCard() {
           : "Gagal menghapus story."
       );
     } finally {
-      setDeletingId(null);
+      setDeleting(false);
     }
   }
 
-  async function handleShare(storyId: string) {
+  /* =======================================================
+     SHARE STORY
+  ======================================================= */
+
+  async function handleShare(
+    story: Story
+  ) {
     try {
-      setSharingId(storyId);
+      setSharing(true);
       setError("");
-      setShareUrl("");
-      setCopiedId(null);
+      setCopied(false);
 
-      const response = await fetch(
-        "/api/my-story/share",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            storyId,
-          }),
-        }
-      );
+      const response =
+        await fetch(
+          "/api/my-story/share",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              storyId: story.id,
+            }),
+          }
+        );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -246,39 +566,55 @@ export default function MyStoryCard() {
         );
       }
 
-      setShareUrl(data.shareUrl);
+      setShareUrl(
+        data.shareUrl
+      );
+
+      const updatedStory: Story = {
+        ...story,
+        isShared: true,
+        shareToken:
+          data.shareToken,
+        sharedAt:
+          story.sharedAt ||
+          new Date().toISOString(),
+      };
 
       setStories((current) =>
-        current.map((story) =>
-          story.id === storyId
-            ? {
-                ...story,
-                isShared: true,
-                shareToken: data.shareToken,
-                sharedAt:
-                  story.sharedAt ||
-                  new Date().toISOString(),
-              }
-            : story
+        current.map((item) =>
+          item.id === story.id
+            ? updatedStory
+            : item
         )
       );
 
+      setSelectedStory(
+        updatedStory
+      );
+
       if (
-        typeof navigator !== "undefined" &&
+        typeof navigator !==
+          "undefined" &&
         navigator.share
       ) {
         try {
           await navigator.share({
-            title: "My JCWF Story",
-            text: "A Story Today, A Brighter Tomorrow",
-            url: data.shareUrl,
+            title:
+              "My JCWF Story",
+            text:
+              "A Story Today, A Brighter Tomorrow",
+            url:
+              data.shareUrl,
           });
         } catch {
-          // User closed the native share dialog.
+          // User closed native share.
         }
       }
     } catch (error) {
-      console.error(error);
+      console.error(
+        "SHARE STORY ERROR:",
+        error
+      );
 
       setError(
         error instanceof Error
@@ -286,338 +622,529 @@ export default function MyStoryCard() {
           : "Gagal membagikan story."
       );
     } finally {
-      setSharingId(null);
+      setSharing(false);
     }
   }
 
-  async function handleCopyLink(
-    storyId: string,
-    url: string
-  ) {
+  /* =======================================================
+     COPY SHARE LINK
+  ======================================================= */
+
+  async function handleCopyLink() {
+    if (!shareUrl) return;
+
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(
+        shareUrl
+      );
 
-      setCopiedId(storyId);
+      setCopied(true);
 
-      window.setTimeout(() => {
-        setCopiedId(null);
-      }, 2000);
+      window.setTimeout(
+        () => {
+          setCopied(false);
+        },
+        1800
+      );
     } catch (error) {
       console.error(error);
 
       setError(
-        "Link tidak dapat disalin. Silakan copy secara manual."
+        "Link tidak dapat disalin."
       );
     }
   }
 
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
   if (loading) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-[#F7F4EA] p-7">
-        <div className="h-3 w-24 animate-pulse rounded-full bg-black/10" />
+      <section className="rounded-[24px] bg-[#E8EFE4] p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 animate-pulse rounded-[12px] bg-white/70" />
 
-        <div className="mt-5 h-6 w-56 animate-pulse rounded-full bg-black/10" />
+            <div className="space-y-2">
+              <div className="h-2 w-20 animate-pulse rounded-full bg-white/70" />
+              <div className="h-2 w-28 animate-pulse rounded-full bg-white/50" />
+            </div>
+          </div>
 
-        <div className="mt-3 h-20 animate-pulse rounded-2xl bg-black/5" />
-      </div>
+          <div className="h-9 w-9 animate-pulse rounded-full bg-white/70" />
+        </div>
+      </section>
     );
   }
 
+  /* =======================================================
+     UI
+  ======================================================= */
+
   return (
-    <div className="rounded-[28px] border border-black/10 bg-[#F7F4EA] p-7">
-      {/* Header */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7B816D]">
-            My Story
-          </p>
+    <>
+      <section className="overflow-hidden rounded-[24px] bg-[#E8EFE4]">
+        {/* =================================================
+            HEADER
+        ================================================== */}
 
-          <h2 className="mt-3 font-serif text-2xl leading-tight text-[#1D241B] sm:text-3xl">
-            What did you reconnect with today?
-          </h2>
-
-          <p className="mt-3 text-sm leading-6 text-[#62675B]">
-            Keep the moments that meant something to you.
-            Your stories stay private until you choose to
-            share them.
-          </p>
-        </div>
-
-        {!showForm && (
+        <div className="flex items-center justify-between px-5 py-4">
           <button
             type="button"
-            onClick={handleNewStory}
-            className="self-start rounded-full bg-[#1D241B] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#30382D]"
+            onClick={() =>
+              setExpanded(
+                (current) => !current
+              )
+            }
+            className="flex min-w-0 items-center gap-3 text-left"
           >
-            + Write a new story
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-white text-forest">
+              <NotesIcon />
+            </span>
+
+            <span className="min-w-0">
+              <span className="block text-[8px] font-bold uppercase tracking-[0.18em] text-gold">
+                My Story
+              </span>
+
+              <span className="mt-0.5 block text-[8px] text-forest/35">
+                Your notes & reflections
+              </span>
+            </span>
           </button>
-        )}
-      </div>
 
-      {/* Error */}
-      {error && (
-        <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
-        </p>
-      )}
+          <div className="flex items-center gap-1.5">
+            {/* PLUS */}
 
-      {/* Form */}
-      {showForm && (
-        <div className="mt-7 rounded-2xl border border-black/5 bg-white p-5 sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-[#30352D]">
-              {editingId
-                ? "Edit your story"
-                : "Write a new story"}
-            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setComposerOpen(true);
+                setEditingStoryId(
+                  null
+                );
+                setReflection("");
+                setError("");
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-forest/65 transition hover:text-forest"
+              aria-label="Create new story"
+            >
+              <PlusIcon />
+            </button>
 
-            <p className="mt-1 text-xs leading-5 text-[#85897D]">
-              What moment, person, place, or feeling do you
-              want to remember?
-            </p>
-          </div>
+            {/* CHEVRON */}
 
-          <form
-            onSubmit={handleSubmit}
-            className="mt-5"
-          >
-            <textarea
-              value={reflection}
-              onChange={(event) =>
-                setReflection(event.target.value)
+            <button
+              type="button"
+              onClick={() =>
+                setExpanded(
+                  (current) => !current
+                )
               }
-              maxLength={1000}
-              rows={6}
-              placeholder="Write your reflection..."
-              className="w-full resize-none rounded-2xl border border-black/10 bg-[#FCFCFA] px-4 py-4 text-sm leading-6 text-[#1D241B] outline-none transition placeholder:text-black/30 focus:border-[#8A9278] focus:ring-2 focus:ring-[#8A9278]/10"
-            />
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/65 text-forest/45 transition hover:text-forest"
+              aria-label={
+                expanded
+                  ? "Collapse My Story"
+                  : "Open My Story"
+              }
+            >
+              <ChevronIcon
+                open={expanded}
+              />
+            </button>
+          </div>
+        </div>
 
-            <div className="mt-2 flex items-center justify-between gap-4 text-xs text-[#85897D]">
-              <span>
-                Your story stays private until you choose
-                to share it.
-              </span>
+        {/* =================================================
+            CONTENT
+        ================================================== */}
 
-              <span className="shrink-0">
-                {reflection.length}/1000
-              </span>
-            </div>
+        {expanded && (
+          <div className="border-t border-forest/[0.06] px-4 pb-4 pt-3">
+            {/* ERROR */}
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            {error && (
+              <div className="mb-3 rounded-[12px] bg-red-50 px-3 py-2 text-[8px] leading-4 text-red-500">
+                {error}
+              </div>
+            )}
+
+            {/* EMPTY */}
+
+            {stories.length === 0 ? (
               <button
-                type="submit"
-                disabled={saving}
-                className="rounded-full bg-[#1D241B] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#30382D] disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                onClick={() =>
+                  setComposerOpen(true)
+                }
+                className="w-full rounded-[18px] bg-[#F8F7F1] px-5 py-6 text-left transition hover:bg-white"
               >
-                {saving
-                  ? "Saving..."
-                  : editingId
-                    ? "Save Changes"
-                    : "Save Story →"}
+                <span className="font-display text-[27px] leading-none text-forest/10">
+                  “
+                </span>
+
+                <p className="mt-1 font-display text-[15px] tracking-[-0.02em] text-forest/65">
+                  Nothing written yet.
+                </p>
+
+                <p className="mt-1 text-[8px] text-forest/30">
+                  Start with a small moment
+                  worth remembering.
+                </p>
               </button>
+            ) : (
+              <div className="space-y-2">
+                {stories.map(
+                  (story) => (
+                    <button
+                      key={story.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedStory(
+                          story
+                        );
+                        setShareUrl("");
+                        setCopied(
+                          false
+                        );
+                        setError("");
+                      }}
+                      className="group relative w-full overflow-hidden rounded-[18px] bg-[#F8F7F1] px-5 py-4 text-left transition hover:bg-white"
+                    >
+                      {/* quotation */}
+
+                      <span className="pointer-events-none absolute -left-1 -top-4 font-display text-[64px] leading-none text-forest/[0.055]">
+                        “
+                      </span>
+
+                      <div className="relative">
+                        <p className="line-clamp-2 font-display text-[15px] leading-6 tracking-[-0.025em] text-forest/75">
+                          {story.reflection}
+                        </p>
+
+                        <div className="mt-3 flex items-center justify-between gap-3">
+                          <span className="text-[7px] font-semibold uppercase tracking-[0.12em] text-forest/25">
+                            {formatStoryDate(
+                              story.updatedAt ||
+                                story.createdAt
+                            )}
+                          </span>
+
+                          {story.isShared && (
+                            <span className="rounded-full bg-[#DDE9D9] px-2 py-1 text-[7px] font-semibold text-forest/55">
+                              Shared
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* =====================================================
+          CREATE STORY SHEET
+      ====================================================== */}
+
+      {composerOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/15 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+          <div className="w-full max-w-[500px] rounded-[28px] bg-[#F8F7F1] p-5 shadow-[0_25px_80px_rgba(49,90,63,0.18)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-gold">
+                  New Story
+                </p>
+
+                <h2 className="mt-1 font-display text-[23px] tracking-[-0.04em] text-forest">
+                  Keep this moment.
+                </h2>
+              </div>
 
               <button
                 type="button"
-                onClick={handleCancel}
-                disabled={saving}
-                className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#30352D] transition hover:bg-black/[0.03]"
+                onClick={() => {
+                  setComposerOpen(
+                    false
+                  );
+                  setReflection("");
+                  setError("");
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest/45"
+                aria-label="Close"
               >
-                Cancel
+                <CloseIcon />
               </button>
             </div>
-          </form>
-        </div>
-      )}
 
-      {/* Empty State */}
-      {!showForm && stories.length === 0 && (
-        <div className="mt-7 rounded-2xl border border-dashed border-black/10 bg-white/60 px-6 py-10 text-center">
-          <p className="font-serif text-xl text-[#30352D]">
-            Your story starts here.
-          </p>
-
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#85897D]">
-            Write down a moment you want to remember from
-            your JCWF journey.
-          </p>
-
-          <button
-            type="button"
-            onClick={handleNewStory}
-            className="mt-5 rounded-full border border-black/10 bg-white px-5 py-2.5 text-sm font-medium text-[#30352D] transition hover:bg-black/[0.03]"
-          >
-            Write your first story
-          </button>
-        </div>
-      )}
-
-      {/* Stories */}
-      {!showForm && stories.length > 0 && (
-        <div className="mt-7 space-y-4">
-          {stories.map((story) => (
-            <article
-              key={story.id}
-              className="rounded-2xl border border-black/5 bg-white p-5 sm:p-6"
+            <form
+              onSubmit={
+                handleCreateStory
+              }
+              className="mt-5"
             >
-              {/* Story Header */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#85897D]">
-                    {formatDate(story.createdAt)}
-                  </p>
+              <textarea
+                autoFocus
+                value={reflection}
+                onChange={(event) =>
+                  setReflection(
+                    event.target.value
+                  )
+                }
+                maxLength={1000}
+                rows={7}
+                placeholder="What did you reconnect with today?"
+                className="w-full resize-none rounded-[20px] border-0 bg-white px-5 py-5 font-display text-[17px] leading-7 tracking-[-0.02em] text-forest outline-none placeholder:text-forest/20 focus:ring-2 focus:ring-forest/10"
+              />
 
-                  <p className="mt-1 text-xs text-[#A0A398]">
-                    {story.updatedAt !== story.createdAt
-                      ? "Edited"
-                      : "My JCWF Story"}
-                  </p>
-                </div>
+              <div className="mt-2 flex items-center justify-between px-1 text-[7px] text-forest/25">
+                <span>
+                  Your story stays private
+                  until you choose to share it.
+                </span>
 
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1.5 text-[11px] font-medium ${
-                      story.isShared
-                        ? "bg-[#E8EEE2] text-[#53604A]"
-                        : "bg-[#F3F2EC] text-[#85897D]"
-                    }`}
-                  >
-                    {story.isShared
-                      ? "Shared"
-                      : "Private"}
-                  </span>
-                </div>
+                <span>
+                  {reflection.length}/1000
+                </span>
               </div>
 
-              {/* Story Content */}
-              <div className="mt-5 rounded-2xl bg-[#F9F8F3] px-5 py-5">
-                <p className="text-sm leading-7 text-[#3F443A]">
-                  “{story.reflection}”
+              {error && (
+                <p className="mt-3 text-[8px] text-red-500">
+                  {error}
                 </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="mt-4 flex h-11 w-full items-center justify-center rounded-full bg-forest text-[10px] font-semibold text-ivory transition hover:bg-gold hover:text-forest disabled:opacity-50"
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Story"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          EDIT STORY SHEET
+      ====================================================== */}
+
+      {editingStoryId && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-forest/15 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+          <div className="w-full max-w-[500px] rounded-[28px] bg-[#F8F7F1] p-5 shadow-[0_25px_80px_rgba(49,90,63,0.18)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-gold">
+                  Edit Story
+                </p>
+
+                <h2 className="mt-1 font-display text-[23px] tracking-[-0.04em] text-forest">
+                  Refine your note.
+                </h2>
               </div>
 
-              {/* Share Link */}
-              {shareUrl &&
-                story.isShared &&
-                story.shareToken &&
-                shareUrl.includes(story.shareToken) && (
-                  <div className="mt-3 rounded-xl border border-black/5 bg-[#FAFAF7] px-3 py-2">
-                    <p className="break-all text-[11px] leading-5 text-[#85897D]">
-                      {shareUrl}
-                    </p>
-                  </div>
-                )}
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingStoryId(
+                    null
+                  );
+                  setReflection("");
+                  setError("");
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest/45"
+                aria-label="Close"
+              >
+                <CloseIcon />
+              </button>
+            </div>
 
-              {/* Actions */}
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleEdit(story)}
-                  className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-xs font-medium text-[#30352D] transition hover:bg-black/[0.03]"
-                >
-                  Edit
-                </button>
+            <form
+              onSubmit={
+                handleEditStory
+              }
+              className="mt-5"
+            >
+              <textarea
+                autoFocus
+                value={reflection}
+                onChange={(event) =>
+                  setReflection(
+                    event.target.value
+                  )
+                }
+                maxLength={1000}
+                rows={7}
+                className="w-full resize-none rounded-[20px] border-0 bg-white px-5 py-5 font-display text-[17px] leading-7 tracking-[-0.02em] text-forest outline-none focus:ring-2 focus:ring-forest/10"
+              />
 
-                {!story.isShared ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleShare(story.id)
-                    }
-                    disabled={
-                      sharingId === story.id
-                    }
-                    className="rounded-full bg-[#1D241B] px-4 py-2.5 text-xs font-medium text-white transition hover:bg-[#30382D] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {sharingId === story.id
-                      ? "Preparing..."
-                      : "Share Story ↗"}
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleShare(story.id)
-                      }
-                      disabled={
-                        sharingId === story.id
-                      }
-                      className="rounded-full bg-[#1D241B] px-4 py-2.5 text-xs font-medium text-white transition hover:bg-[#30382D] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {sharingId === story.id
-                        ? "Sharing..."
-                        : "Share Again ↗"}
-                    </button>
+              {error && (
+                <p className="mt-3 text-[8px] text-red-500">
+                  {error}
+                </p>
+              )}
 
-                    {shareUrl &&
-                      story.shareToken &&
-                      shareUrl.includes(
-                        story.shareToken
-                      ) && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleCopyLink(
-                              story.id,
-                              shareUrl
-                            )
-                          }
-                          className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-xs font-medium text-[#30352D] transition hover:bg-black/[0.03]"
-                        >
-                          {copiedId === story.id
-                            ? "Copied ✓"
-                            : "Copy Link"}
-                        </button>
-                      )}
-                  </>
-                )}
+              <button
+                type="submit"
+                disabled={saving}
+                className="mt-4 flex h-11 w-full items-center justify-center rounded-full bg-forest text-[10px] font-semibold text-ivory transition hover:bg-gold hover:text-forest disabled:opacity-50"
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Changes"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleDelete(story.id)
-                  }
-                  disabled={
-                    deletingId === story.id
-                  }
-                  className="rounded-full border border-red-100 bg-white px-4 py-2.5 text-xs font-medium text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {deletingId === story.id
-                    ? "Deleting..."
-                    : "Delete"}
-                </button>
-              </div>
+      {/* =====================================================
+          STORY DETAIL
+      ====================================================== */}
 
-              {/* Privacy Note */}
-              <p className="mt-3 text-xs leading-5 text-[#85897D]">
-                {story.isShared
-                  ? "This story has a public share link."
-                  : "This story stays private until you choose to share it."}
+      {selectedStory && (
+        <div className="fixed inset-0 z-[110] flex items-end justify-center bg-forest/20 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+          <div className="relative max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-[30px] bg-[#F8F7F1] p-6 shadow-[0_25px_80px_rgba(49,90,63,0.2)]">
+            {/* close */}
+
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedStory(
+                  null
+                )
+              }
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white text-forest/45"
+              aria-label="Close story"
+            >
+              <CloseIcon />
+            </button>
+
+            {/* heading */}
+
+            <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-gold">
+              My Story
+            </p>
+
+            <p className="mt-2 text-[8px] font-medium uppercase tracking-[0.12em] text-forest/25">
+              {formatStoryDate(
+                selectedStory.updatedAt ||
+                  selectedStory.createdAt
+              )}
+            </p>
+
+            {/* quote */}
+
+            <div className="relative mt-6 overflow-hidden rounded-[22px] bg-white px-6 py-7">
+              <span className="pointer-events-none absolute -left-2 -top-5 font-display text-[100px] leading-none text-forest/[0.055]">
+                “
+              </span>
+
+              <p className="relative font-display text-[21px] leading-8 tracking-[-0.025em] text-forest/80">
+                {selectedStory.reflection}
               </p>
-            </article>
-          ))}
-        </div>
-      )}
 
-      {/* Continue Journey */}
-      {!showForm && (
-        <div className="mt-7">
-          <button
-            type="button"
-            onClick={() => {
-              document
-                .getElementById("my-journey")
-                ?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-            }}
-            className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-xs font-medium text-[#30352D] transition hover:bg-black/[0.03]"
-          >
-            Continue Journey →
-          </button>
+              {selectedStory.isShared && (
+                <span className="mt-6 inline-flex rounded-full bg-[#DDE9D9] px-2.5 py-1.5 text-[7px] font-semibold text-forest/55">
+                  Shared
+                </span>
+              )}
+            </div>
+
+            {error && (
+              <p className="mt-3 text-[8px] text-red-500">
+                {error}
+              </p>
+            )}
+
+            {/* actions */}
+
+            <div className="mt-5 flex items-center justify-center gap-2">
+              {/* edit */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  startEditing(
+                    selectedStory
+                  )
+                }
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-forest/55 transition hover:text-forest"
+                aria-label="Edit story"
+              >
+                <EditIcon />
+              </button>
+
+              {/* share */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleShare(
+                    selectedStory
+                  )
+                }
+                disabled={sharing}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-forest text-ivory transition hover:bg-gold hover:text-forest disabled:opacity-50"
+                aria-label="Share story"
+              >
+                <ShareIcon />
+              </button>
+
+              {/* copy */}
+
+              {shareUrl && (
+                <button
+                  type="button"
+                  onClick={
+                    handleCopyLink
+                  }
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-forest/55 transition hover:text-forest"
+                  aria-label="Copy share link"
+                >
+                  <CopyIcon />
+
+                  {copied && (
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-forest px-2 py-1 text-[7px] text-white">
+                      Copied
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* delete */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleDeleteStory(
+                    selectedStory
+                  )
+                }
+                disabled={deleting}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-400/60 transition hover:text-red-500 disabled:opacity-40"
+                aria-label="Delete story"
+              >
+                <DeleteIcon />
+              </button>
+            </div>
+
+            {selectedStory.isShared && (
+              <p className="mt-4 text-center text-[8px] text-forest/25">
+                This story has a public share
+                link.
+              </p>
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

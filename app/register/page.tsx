@@ -139,7 +139,11 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-ivory">
-      {/* HEADER */}
+
+      {/* =========================
+          HEADER
+      ========================= */}
+
       <header className="flex items-center justify-between px-6 py-6 md:px-10 lg:px-14">
         <a
           href="/"
@@ -149,19 +153,32 @@ export default function RegisterPage() {
         </a>
 
         <a
-          href="/"
-          className="text-sm font-medium text-forest/60 transition-colors hover:text-forest"
-        >
-          {t.register.backHome}
-        </a>
+  href="/"
+  className="inline-flex items-center gap-1.5 rounded-full border border-forest/10 bg-white/70 px-4 py-2 text-xs font-semibold text-forest shadow-[0_5px_18px_rgba(23,56,42,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-forest/15 hover:bg-sage"
+>
+  <span
+    aria-hidden="true"
+    className="text-sm leading-none"
+  >
+    ←
+  </span>
+  <span>Back</span>
+</a>
       </header>
 
-      {/* CONTENT */}
+      {/* =========================
+          CONTENT
+      ========================= */}
+
       <section className="mx-auto max-w-[1180px] px-6 pb-20 pt-8 md:px-10 md:pt-14 lg:px-14">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
 
-          {/* LEFT */}
+          {/* =========================
+              LEFT INTRO
+          ========================= */}
+
           <div className="lg:sticky lg:top-10">
+
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
               {t.register.eyebrow}
             </p>
@@ -178,6 +195,7 @@ export default function RegisterPage() {
               {t.register.intro}
             </p>
 
+            {/* BENEFITS */}
             <div className="mt-10 rounded-[2rem] bg-sage p-6 md:p-7">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-forest/50">
                 {t.register.benefitsTitle}
@@ -240,7 +258,10 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* FORM */}
+          {/* =========================
+              FORM
+          ========================= */}
+
           <div className="rounded-[2rem] bg-white p-6 shadow-[0_20px_60px_rgba(23,56,42,0.08)] md:p-9 lg:p-10">
 
             <div className="mb-8">
@@ -262,7 +283,10 @@ export default function RegisterPage() {
               className="space-y-6"
             >
 
-              {/* NAME */}
+              {/* =========================
+                  NAME
+              ========================= */}
+
               <div>
                 <label
                   htmlFor="fullName"
@@ -286,11 +310,14 @@ export default function RegisterPage() {
                   placeholder={
                     t.register.form.fullNamePlaceholder
                   }
-                  className="w-full rounded-2xl bg-ivory px-4 py-3.5 text-sm text-forest outline-none ring-1 ring-transparent transition-all placeholder:text-forest/30 focus:bg-white focus:ring-gold/50"
+                  className="w-full rounded-2xl border border-[#E8E2CF] bg-white px-4 py-3.5 text-sm text-forest shadow-[0_4px_18px_rgba(196,176,120,0.08)] outline-none transition-all duration-200 placeholder:text-forest/30 hover:border-[#DDD5BD] focus:border-gold/45 focus:shadow-[0_5px_20px_rgba(196,176,120,0.14)]"
                 />
               </div>
 
-              {/* WHATSAPP + EMAIL */}
+              {/* =========================
+                  WHATSAPP + EMAIL
+              ========================= */}
+
               <div className="grid gap-6 md:grid-cols-2">
 
                 <div>
@@ -316,7 +343,7 @@ export default function RegisterPage() {
                     placeholder={
                       t.register.form.whatsappPlaceholder
                     }
-                    className="w-full rounded-2xl bg-ivory px-4 py-3.5 text-sm text-forest outline-none ring-1 ring-transparent transition-all placeholder:text-forest/30 focus:bg-white focus:ring-gold/50"
+                    className="w-full rounded-2xl border border-[#E8E2CF] bg-white px-4 py-3.5 text-sm text-forest shadow-[0_4px_18px_rgba(196,176,120,0.08)] outline-none transition-all duration-200 placeholder:text-forest/30 hover:border-[#DDD5BD] focus:border-gold/45 focus:shadow-[0_5px_20px_rgba(196,176,120,0.14)]"
                   />
                 </div>
 
@@ -343,13 +370,16 @@ export default function RegisterPage() {
                     placeholder={
                       t.register.form.emailPlaceholder
                     }
-                    className="w-full rounded-2xl bg-ivory px-4 py-3.5 text-sm text-forest outline-none ring-1 ring-transparent transition-all placeholder:text-forest/30 focus:bg-white focus:ring-gold/50"
+                    className="w-full rounded-2xl border border-[#E8E2CF] bg-white px-4 py-3.5 text-sm text-forest shadow-[0_4px_18px_rgba(196,176,120,0.08)] outline-none transition-all duration-200 placeholder:text-forest/30 hover:border-[#DDD5BD] focus:border-gold/45 focus:shadow-[0_5px_20px_rgba(196,176,120,0.14)]"
                   />
                 </div>
 
               </div>
 
-              {/* CITY */}
+              {/* =========================
+                  CITY
+              ========================= */}
+
               <div>
                 <label
                   htmlFor="city"
@@ -373,11 +403,14 @@ export default function RegisterPage() {
                   placeholder={
                     t.register.form.cityPlaceholder
                   }
-                  className="w-full rounded-2xl bg-ivory px-4 py-3.5 text-sm text-forest outline-none ring-1 ring-transparent transition-all placeholder:text-forest/30 focus:bg-white focus:ring-gold/50"
+                  className="w-full rounded-2xl border border-[#E8E2CF] bg-white px-4 py-3.5 text-sm text-forest shadow-[0_4px_18px_rgba(196,176,120,0.08)] outline-none transition-all duration-200 placeholder:text-forest/30 hover:border-[#DDD5BD] focus:border-gold/45 focus:shadow-[0_5px_20px_rgba(196,176,120,0.14)]"
                 />
               </div>
 
-              {/* INTEREST */}
+              {/* =========================
+                  INTEREST
+              ========================= */}
+
               <div>
                 <div className="mb-3">
                   <p className="text-sm font-semibold text-forest">
@@ -406,22 +439,22 @@ export default function RegisterPage() {
                             interest.value
                           )
                         }
-                        className={`rounded-2xl p-4 text-left transition-all ${
+                        className={`rounded-2xl border p-4 text-left transition-all duration-200 ${
                           selected
-                            ? "bg-forest text-ivory shadow-md"
-                            : "bg-ivory text-forest hover:bg-sage"
+                            ? "border-forest bg-forest text-ivory shadow-[0_6px_20px_rgba(23,56,42,0.12)]"
+                            : "border-[#E8E2CF] bg-white text-forest shadow-[0_4px_18px_rgba(196,176,120,0.06)] hover:border-[#DDD5BD] hover:bg-[#FFFDF8]"
                         }`}
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-3">
                           <span className="font-display text-xl">
                             {interest.title}
                           </span>
 
                           <span
-                            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs ${
                               selected
                                 ? "bg-gold text-forest"
-                                : "bg-white text-forest/20"
+                                : "bg-ivory text-forest/20"
                             }`}
                           >
                             {selected ? "✓" : ""}
@@ -443,7 +476,10 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* PASSWORD */}
+              {/* =========================
+                  PASSWORD
+              ========================= */}
+
               <div>
                 <label
                   htmlFor="password"
@@ -468,11 +504,14 @@ export default function RegisterPage() {
                   placeholder={
                     t.register.form.passwordPlaceholder
                   }
-                  className="w-full rounded-2xl bg-ivory px-4 py-3.5 text-sm text-forest outline-none ring-1 ring-transparent transition-all placeholder:text-forest/30 focus:bg-white focus:ring-gold/50"
+                  className="w-full rounded-2xl border border-[#E8E2CF] bg-white px-4 py-3.5 text-sm text-forest shadow-[0_4px_18px_rgba(196,176,120,0.08)] outline-none transition-all duration-200 placeholder:text-forest/30 hover:border-[#DDD5BD] focus:border-gold/45 focus:shadow-[0_5px_20px_rgba(196,176,120,0.14)]"
                 />
               </div>
 
-              {/* PRIVACY */}
+              {/* =========================
+                  PRIVACY
+              ========================= */}
+
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
@@ -490,36 +529,39 @@ export default function RegisterPage() {
                 </span>
               </label>
 
-              {/* ERROR */}
+              {/* =========================
+                  ERROR
+              ========================= */}
+
               {errorMessage && (
                 <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm leading-5 text-red-700">
                   {errorMessage}
                 </div>
               )}
 
-              {/* SUBMIT */}
+              {/* =========================
+                  SUBMIT
+              ========================= */}
+
               <button
                 type="submit"
                 disabled={loading}
-                className="group flex w-full items-center justify-center gap-3 rounded-full bg-forest px-6 py-4 text-sm font-semibold text-ivory shadow-[0_10px_30px_rgba(23,56,42,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full cursor-pointer items-center justify-center rounded-full bg-forest px-6 py-4 text-sm font-semibold text-ivory shadow-[0_10px_30px_rgba(23,56,42,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading
                   ? t.register.form.creating
                   : t.register.form.submit}
-
-                {!loading && (
-                  <span className="transition-transform duration-300 group-hover:translate-x-1">
-                    →
-                  </span>
-                )}
               </button>
 
-              {/* LOGIN */}
+              {/* =========================
+                  LOGIN
+              ========================= */}
+
               <p className="text-center text-xs text-forest/40">
                 {t.register.form.alreadyHaveAccount}{" "}
                 <a
                   href="/login"
-                  className="font-semibold text-forest hover:text-gold"
+                  className="font-semibold text-forest transition-colors hover:text-gold"
                 >
                   {t.register.form.login}
                 </a>

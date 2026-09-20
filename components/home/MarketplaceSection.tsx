@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type MarketplaceItem = {
@@ -20,7 +20,9 @@ export default function MarketplaceSection() {
   const { t } = useLanguage();
 
   const [items, setItems] = useState<MarketplaceItem[]>([]);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] =
+    useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   const categories = [
@@ -52,14 +54,19 @@ export default function MarketplaceSection() {
         const response = await fetch("/api/marketplace");
 
         if (!response.ok) {
-          throw new Error("Failed to load marketplace.");
+          throw new Error(
+            "Failed to load marketplace."
+          );
         }
 
         const data = await response.json();
 
         setItems(data.items ?? []);
       } catch (error) {
-        console.error("LOAD MARKETPLACE ERROR:", error);
+        console.error(
+          "LOAD MARKETPLACE ERROR:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -68,28 +75,28 @@ export default function MarketplaceSection() {
     loadMarketplace();
   }, []);
 
-  const filteredItems =
-    activeCategory === "all"
-      ? items
-      : items.filter(
-          (item) =>
-            item.category.toLowerCase() === activeCategory
-        );
+  const filteredItems = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
 
-  const featuredItem =
-    activeCategory === "all"
-      ? items[0]
-      : null;
+    return items.filter((item) => {
+      const matchesCategory =
+        activeCategory === "all" ||
+        item.category.toLowerCase() ===
+          activeCategory;
 
-  const formatPrice = (price: number) => {
-    if (price === 0) return "Free";
+      const matchesSearch =
+        !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.vendor.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query);
 
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+      return matchesCategory && matchesSearch;
+    });
+  }, [
+    items,
+    activeCategory,
+    searchQuery,
+  ]);
 
   return (
     <section
@@ -99,7 +106,7 @@ export default function MarketplaceSection() {
       <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-14">
 
         {/* HEADER */}
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-gold">
               {t.marketplace.eyebrow}
@@ -114,193 +121,145 @@ export default function MarketplaceSection() {
             </h2>
           </div>
 
-          <p className="max-w-md text-sm leading-7 text-forest/60 lg:pb-2 lg:text-[15px]">
-            {t.marketplace.description}
-          </p>
+          <div className="flex max-w-md flex-col gap-5 lg:items-end lg:pb-2">
+            <p className="text-sm leading-6 text-forest/60 lg:text-right lg:text-[15px] lg:leading-7">
+              {t.marketplace.description}
+            </p>
+
+            <a
+              href="/marketplace"
+              className="inline-flex w-fit items-center rounded-full border border-white/15 bg-[#A8B99F]/55 px-5 py-2.5 text-sm font-semibold text-forest shadow-[0_8px_25px_rgba(23,56,42,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#A8B99F]/75"
+            >
+              {t.marketplace.viewAll}
+            </a>
+          </div>
         </div>
 
-        {/* CATEGORY FILTER */}
-        <div className="mt-10 flex gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => {
-            const isActive =
-              activeCategory === category.key;
+        {/* FILTER + SEARCH */}
+        <div className="mt-10 flex flex-col gap-4 md:mt-12">
+          
+          {/* CATEGORIES */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {categories.map((category) => {
+              const isActive =
+                activeCategory === category.key;
 
-            return (
-              <button
-                key={category.key}
-                type="button"
-                onClick={() =>
-                  setActiveCategory(category.key)
-                }
-                className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold tracking-[0.08em] transition-all duration-300 ${
-                  isActive
-                    ? "bg-forest text-ivory"
-                    : "bg-sage/60 text-forest/60 hover:bg-forest hover:text-ivory"
-                }`}
+              return (
+                <button
+                  key={category.key}
+                  type="button"
+                  onClick={() =>
+                    setActiveCategory(
+                      category.key
+                    )
+                  }
+                  className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold tracking-[0.06em] transition-all duration-300 ${
+                    isActive
+                      ? "bg-forest text-ivory"
+                      : "bg-sage/55 text-forest/60 hover:bg-sage hover:text-forest"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* SEARCH */}
+          <div className="relative w-full md:max-w-sm">
+            <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-forest/40">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                className="h-4 w-4"
+                aria-hidden="true"
               >
-                {category.label}
-              </button>
-            );
-          })}
+                <circle cx="11" cy="11" r="6.5" />
+                <path
+                  d="m16 16 4 4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) =>
+                setSearchQuery(event.target.value)
+              }
+              placeholder="Search marketplace..."
+              className="w-full rounded-full border border-forest/10 bg-white/45 py-3 pl-11 pr-5 text-sm text-forest outline-none backdrop-blur-md transition-all placeholder:text-forest/35 focus:border-forest/20 focus:bg-white/65"
+            />
+          </div>
         </div>
 
-        {/* LOADING */}
+        {/* CONTENT */}
         {loading ? (
-          <div className="mt-8 rounded-[2rem] bg-sage/40 p-12 text-center">
+          <div className="mt-10 rounded-[1.75rem] bg-sage/35 px-6 py-12 text-center">
             <p className="text-sm text-forest/50">
               Loading marketplace...
             </p>
           </div>
         ) : filteredItems.length === 0 ? (
-          /* EMPTY STATE */
-          <div className="mt-8 rounded-[2rem] bg-sage/40 p-12 text-center">
+          <div className="mt-10 rounded-[1.75rem] bg-sage/35 px-6 py-12 text-center">
             <p className="font-display text-2xl text-forest">
-              No items found.
+              No marketplace found.
             </p>
 
             <p className="mt-2 text-sm text-forest/50">
-              There are no marketplace items in this category yet.
+              Try another category or search.
             </p>
           </div>
         ) : (
-          <>
-            {/* FEATURED — ONLY ON ALL */}
-            {featuredItem && (
-              <div className="group relative mt-8 min-h-[420px] overflow-hidden rounded-[2rem] bg-forest md:min-h-[500px]">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.04]"
-                  style={{
-                    backgroundImage: `linear-gradient(
-                      90deg,
-                      rgba(23,56,42,0.9) 0%,
-                      rgba(23,56,42,0.5) 45%,
-                      rgba(23,56,42,0.08) 100%
-                    ), url('${
-                      featuredItem.image_url ??
-                      "/images/marketplace-featured.jpg"
-                    }')`,
-                  }}
-                />
-
-                <div className="relative flex min-h-[420px] flex-col justify-end p-7 md:min-h-[500px] md:p-10 lg:p-12">
-                  <span className="w-fit rounded-full bg-gold px-3 py-1.5 text-[10px] font-bold tracking-[0.15em] text-forest">
-                    {featuredItem.category}
-                  </span>
-
-                  <h3 className="mt-5 max-w-2xl font-display text-4xl leading-[0.95] tracking-[-0.04em] text-white md:text-6xl">
-                    {featuredItem.title}
-                  </h3>
-
-                  <p className="mt-5 max-w-lg text-sm leading-6 text-white/65 md:text-[15px]">
-                    {featuredItem.description}
-                  </p>
-
-                  <div className="mt-7 flex flex-wrap items-center gap-4">
-                    <a
-                      href={`/marketplace/${featuredItem.slug}`}
-                      className="group/btn inline-flex items-center gap-3 rounded-full bg-ivory px-6 py-3.5 text-sm font-semibold text-forest transition-all duration-300 hover:bg-gold"
-                    >
-                      {t.marketplace.explore}
-
-                      <span className="transition-transform duration-300 group-hover/btn:translate-x-1">
-                        →
-                      </span>
-                    </a>
-
-                    <span className="text-xs text-white/50">
-                      {formatPrice(featuredItem.price)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute right-7 top-7 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-lg text-forest shadow-lg transition-all duration-500 group-hover:rotate-45 group-hover:bg-gold md:right-10 md:top-10">
-                  ↗
-                </div>
-              </div>
-            )}
-
-            {/* PRODUCT GRID */}
-            <div
-              className={`mt-5 grid gap-4 sm:grid-cols-2 ${
-                activeCategory === "all"
-                  ? "lg:grid-cols-4"
-                  : "lg:grid-cols-3"
-              }`}
-            >
-              {filteredItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`/marketplace/${item.slug}`}
-                  className="group overflow-hidden rounded-[1.8rem] bg-sage/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(23,56,42,0.08)]"
-                >
-                  {/* IMAGE */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                      style={{
-                        backgroundImage: `url('${
-                          item.image_url ??
-                          "/images/marketplace-local.jpg"
-                        }')`,
-                      }}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:mt-10 md:grid-cols-4 lg:grid-cols-5 lg:gap-4">
+            {filteredItems.map((item) => (
+              <a
+                key={item.id}
+                href={`/marketplace/${item.slug}`}
+                className="group overflow-hidden rounded-[1.5rem] bg-sage/35 transition-all duration-400 hover:-translate-y-1 hover:bg-sage/55 hover:shadow-[0_16px_35px_rgba(23,56,42,0.07)]"
+              >
+                {/* LOGO / IMAGE */}
+                <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-white/55 p-6 md:p-8">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.vendor}
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
-
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[9px] font-bold tracking-[0.12em] text-forest backdrop-blur-sm">
-                      {item.category}
-                    </span>
-
-                    <span className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-sm text-forest shadow-sm transition-all duration-300 group-hover:rotate-45 group-hover:bg-gold">
-                      ↗
-                    </span>
-                  </div>
-
-                  {/* INFO */}
-                  <div className="p-5">
-                    <p className="text-xs text-forest/45">
-                      {item.vendor}
-                    </p>
-
-                    <h3 className="mt-1 font-display text-2xl tracking-[-0.03em] text-forest">
-                      {item.title}
-                    </h3>
-
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-forest">
-                        {formatPrice(item.price)}
-                      </span>
-
-                      <span className="text-xs text-forest/40">
-                        {t.marketplace.view}
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-center">
+                      <span className="font-display text-xl leading-tight text-forest/30 md:text-2xl">
+                        {item.vendor}
                       </span>
                     </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </>
+                  )}
+
+                  {/* CATEGORY */}
+                  <span className="absolute left-3 top-3 rounded-full bg-ivory/90 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-forest backdrop-blur-md md:left-4 md:top-4 md:px-3 md:py-1.5 md:text-[9px]">
+                    {item.category}
+                  </span>
+                </div>
+
+                {/* BRAND INFO */}
+                <div className="p-4 md:p-5">
+                  <h3 className="font-display text-lg leading-tight tracking-[-0.025em] text-forest md:text-xl">
+                    {item.vendor}
+                  </h3>
+
+                  <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-forest/40 md:text-[11px]">
+                    {item.title}
+                  </p>
+                </div>
+              </a>
+            ))}
+          </div>
         )}
 
-        {/* BOTTOM CTA */}
-        <div className="mt-8 flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
-          <p className="max-w-lg font-display text-2xl leading-tight text-forest md:text-3xl">
-            {t.marketplace.bottomTitleLine1}
-            <span className="text-gold">
-              {" "}
-              {t.marketplace.bottomTitleLine2}
-            </span>
-          </p>
-
-          <a
-            href="/marketplace"
-            className="group inline-flex items-center gap-3 rounded-full bg-forest px-6 py-3.5 text-sm font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest"
-          >
-            {t.marketplace.viewAll}
-
-            <span className="transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
-          </a>
-        </div>
+       
       </div>
     </section>
   );

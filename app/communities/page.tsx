@@ -32,6 +32,10 @@ function getImage(community: Community) {
   );
 }
 
+function getInitial(name: string) {
+  return name.charAt(0).toUpperCase();
+}
+
 export default function CommunitiesPage() {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,150 +77,353 @@ export default function CommunitiesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#F8F6EF] text-[#183D31]">
-      {/* Header */}
-      <header className="mx-auto max-w-7xl px-6 pb-4 pt-12 lg:px-10 lg:pt-14">
-        <div className="flex items-end justify-between gap-6">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#A87835]">
-              JCWF 2026
-            </p>
+    <main className="min-h-screen bg-ivory text-forest">
+      {/* =====================================================
+          NAVBAR
+      ====================================================== */}
+      <header className="sticky top-0 z-50 border-b border-forest/6 bg-ivory/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 md:h-[76px] md:px-10 lg:px-14">
+          <Link
+            href="/"
+            className="font-display text-[26px] font-semibold tracking-[-0.05em] text-forest"
+          >
+            JCWF<span className="text-gold">.</span>
+          </Link>
 
-            <h1 className="mt-4 font-serif text-5xl leading-none tracking-tight text-[#183D31] sm:text-6xl lg:text-7xl">
-              Explore Communities
-            </h1>
+          <nav className="hidden items-center gap-7 md:flex">
+            <Link
+              href="/"
+              className="text-sm text-forest/45 transition-colors hover:text-forest"
+            >
+              Explore
+            </Link>
 
-            <p className="mt-5 max-w-3xl text-base leading-7 text-[#66706A] sm:text-lg">
-              Meet people and communities connected by wellness, culture,
-              creativity, nature, and shared experiences.
-            </p>
-          </div>
+            <Link
+              href="/#activities"
+              className="text-sm text-forest/45 transition-colors hover:text-forest"
+            >
+              Activities
+            </Link>
+
+            <Link
+              href="/communities"
+              className="font-semibold text-forest"
+            >
+              Communities
+            </Link>
+          </nav>
 
           <Link
             href="/my"
-            className="hidden shrink-0 rounded-full border border-[#183D31]/15 bg-white px-7 py-3.5 text-base font-medium text-[#183D31] transition hover:border-[#183D31]/30 hover:bg-[#183D31] hover:text-white sm:inline-flex"
+            className="rounded-full bg-forest px-4 py-2.5 text-[11px] font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest md:px-5 md:text-xs"
           >
-            My Plan
+            My JCWF
           </Link>
         </div>
-
-        {/* Mobile My Plan */}
-        <Link
-          href="/my"
-          className="mt-7 inline-flex rounded-full border border-[#183D31]/15 bg-white px-6 py-3 text-sm font-medium text-[#183D31] transition hover:bg-[#183D31] hover:text-white sm:hidden"
-        >
-          My Plan
-        </Link>
       </header>
 
-      {/* Community Grid */}
-      <section className="mx-auto max-w-7xl px-6 pb-20 pt-10 lg:px-10 lg:pb-28 lg:pt-12">
-        {loading ? (
-          <div className="flex min-h-[400px] items-center justify-center">
-            <p className="text-sm text-[#66706A]">
-              Loading communities...
+      {/* =====================================================
+          CONTENT
+      ====================================================== */}
+      <div className="mx-auto max-w-[1440px] px-5 pb-14 pt-9 md:px-10 md:pb-24 md:pt-14 lg:px-14">
+
+        {/* ===================================================
+            INTRO
+        ==================================================== */}
+        <section>
+          <div className="grid gap-6 lg:grid-cols-[1fr_0.55fr] lg:items-end lg:gap-16">
+            <div className="max-w-4xl">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+
+                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-gold md:text-xs">
+                  JCWF Community
+                </p>
+              </div>
+
+              <h1 className="mt-3 font-display text-[clamp(3rem,7vw,6.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-forest md:mt-4">
+                Find your
+                <br />
+                <span className="text-gold">people.</span>
+              </h1>
+            </div>
+
+            <p className="max-w-md text-xs leading-5 text-forest/50 md:text-[15px] md:leading-7 lg:pb-1">
+              Discover communities across Jogja connected
+              by wellness, culture, creativity, nature, and
+              shared experiences.
             </p>
           </div>
-        ) : errorMessage ? (
-          <div className="rounded-[28px] border border-[#183D31]/10 bg-white p-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A87835]">
-              Community
-            </p>
+        </section>
 
-            <h2 className="mt-3 font-serif text-3xl text-[#183D31]">
-              Something went wrong
-            </h2>
+        {/* ===================================================
+            COMMUNITY SECTION
+        ==================================================== */}
+        <section className="mt-9 md:mt-16">
+          {loading ? (
+            <>
+              {/* MOBILE LOADING */}
+              <div className="flex gap-3 overflow-hidden md:hidden">
+                {[1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className="w-[61vw] max-w-[250px] shrink-0 overflow-hidden rounded-[1.35rem] bg-white"
+                  >
+                    <div className="aspect-[1.18/1] animate-pulse bg-sage/50" />
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#66706A]">
-              {errorMessage}
-            </p>
-
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-7 rounded-full bg-[#183D31] px-6 py-3 text-sm font-medium text-white transition hover:opacity-85"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : communities.length === 0 ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[28px] border border-[#183D31]/10 bg-white px-6 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A87835]">
-              Community
-            </p>
-
-            <h2 className="mt-3 font-serif text-3xl text-[#183D31]">
-              No communities yet
-            </h2>
-
-            <p className="mt-3 max-w-md text-sm leading-6 text-[#66706A]">
-              Communities will appear here as they become available.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {communities.map((community) => (
-              <Link
-                key={community.id}
-                href={`/communities/${community.slug}`}
-                className="group overflow-hidden rounded-[28px] border border-[#183D31]/10 bg-white shadow-[0_2px_8px_rgba(24,61,49,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(24,61,49,0.12)]"
-              >
-                {/* Image */}
-                <div className="relative aspect-[1.15/1] overflow-hidden bg-[#E7E5DC]">
-                  <img
-                    src={getImage(community)}
-                    alt={community.name}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                  />
-
-                  {/* Category */}
-                  <div className="absolute left-5 top-5">
-                    <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#183D31] shadow-sm">
-                      {community.category}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-7">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A87835]">
-                    {community.memberCount}{" "}
-                    {community.memberCount === 1
-                      ? "MEMBER"
-                      : "MEMBERS"}
-                  </p>
-
-                  <h2 className="mt-4 font-serif text-[28px] leading-tight text-[#183D31]">
-                    {community.name}
-                  </h2>
-
-                  <p className="mt-4 line-clamp-3 min-h-[72px] text-[15px] leading-6 text-[#66706A]">
-                    {community.description ||
-                      "Discover people, stories, and experiences within this community."}
-                  </p>
-
-                  <div className="mt-7 border-t border-[#183D31]/10 pt-5">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs text-[#7B847F]">
-                          Community
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-[#183D31]">
-                          Join the community
-                        </p>
-                      </div>
-
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-[#183D31] px-5 py-3 text-sm font-medium text-white transition group-hover:bg-[#234F40]">
-                        View Community
-                      </span>
+                    <div className="space-y-2.5 p-4">
+                      <div className="h-5 w-3/4 animate-pulse rounded-full bg-sage/50" />
+                      <div className="h-2.5 w-1/3 animate-pulse rounded-full bg-sage/60" />
+                      <div className="h-8 w-full animate-pulse rounded-full bg-sage/40" />
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* DESKTOP LOADING */}
+              <div className="hidden gap-4 md:grid md:grid-cols-3">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="overflow-hidden rounded-[1.5rem] bg-white"
+                  >
+                    <div className="aspect-[1.2/1] animate-pulse bg-sage/50" />
+
+                    <div className="space-y-3 p-5">
+                      <div className="h-7 w-3/4 animate-pulse rounded-full bg-sage/50" />
+                      <div className="h-3 w-1/3 animate-pulse rounded-full bg-sage/60" />
+                      <div className="h-10 w-full animate-pulse rounded-full bg-sage/40" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : errorMessage ? (
+            <div className="rounded-[1.5rem] bg-white px-5 py-14 text-center md:rounded-[1.75rem] md:py-20">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-gold">
+                Community
+              </p>
+
+              <h2 className="mt-3 font-display text-3xl tracking-[-0.04em] text-forest md:text-4xl">
+                Something went wrong
+              </h2>
+
+              <p className="mx-auto mt-3 max-w-md text-xs leading-5 text-forest/45 md:text-sm md:leading-6">
+                {errorMessage}
+              </p>
+
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="mt-6 rounded-full bg-forest px-5 py-3 text-xs font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest md:px-6 md:py-3.5 md:text-sm"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : communities.length === 0 ? (
+            <div className="rounded-[1.5rem] bg-sage/45 px-5 py-14 text-center md:rounded-[1.75rem] md:py-20">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-forest text-[10px] font-semibold text-gold">
+                JC
+              </div>
+
+              <h2 className="mt-5 font-display text-3xl tracking-[-0.04em] text-forest">
+                No communities yet
+              </h2>
+
+              <p className="mx-auto mt-3 max-w-md text-xs leading-5 text-forest/45 md:text-sm md:leading-6">
+                Communities will appear here as they become
+                available.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* =================================================
+                  MOBILE
+              ================================================== */}
+              <div className="md:hidden">
+                <div className="mb-4 flex items-end justify-between">
+                  <div>
+                    <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-forest/35">
+                      Community directory
+                    </p>
+
+                    <p className="mt-1 text-[10px] text-forest/40">
+                      Swipe to explore
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/communities"
+                    className="text-[10px] font-semibold text-forest"
+                  >
+                    View all
+                  </Link>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+
+                <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 scrollbar-none">
+                  {communities.map((community) => (
+                    <Link
+                      key={community.id}
+                      href={`/communities/${community.slug}`}
+                      className="group flex w-[61vw] max-w-[250px] shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-[0_6px_24px_rgba(23,56,42,0.045)]"
+                    >
+                      {/* IMAGE */}
+                      <div className="relative aspect-[1.18/1] shrink-0 overflow-hidden bg-sage">
+                        <img
+                          src={getImage(community)}
+                          alt={community.name}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        />
+
+                        <div className="absolute left-3 top-3">
+                          <span className="inline-flex rounded-full bg-ivory/90 px-2.5 py-1.5 text-[7px] font-bold uppercase tracking-[0.12em] text-forest backdrop-blur-md">
+                            {community.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* CONTENT */}
+                      <div className="flex min-h-[166px] flex-1 flex-col p-4">
+                        {/* TITLE AREA */}
+                        <div className="min-h-[48px]">
+                          <h2 className="line-clamp-2 font-display text-[1.35rem] leading-[0.98] tracking-[-0.035em] text-forest">
+                            {community.name}
+                          </h2>
+                        </div>
+
+                        {/* MEMBER */}
+                        <p className="mt-1.5 h-3 text-[8px] font-semibold uppercase tracking-[0.13em] text-gold">
+                          {community.memberCount}{" "}
+                          {community.memberCount === 1
+                            ? "member"
+                            : "members"}
+                        </p>
+
+                        {/* DESCRIPTION */}
+                        <p className="mt-2.5 line-clamp-2 h-8 text-[10px] leading-4 text-forest/45">
+                          {community.description ||
+                            "Discover people, stories, and experiences within this community."}
+                        </p>
+
+                        {/* LINK */}
+                        <div className="mt-auto border-t border-forest/8 pt-3.5">
+                          <span className="text-[9px] font-semibold text-forest transition-colors group-hover:text-gold">
+                            Explore community
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* =================================================
+                  DESKTOP
+              ================================================== */}
+              <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+                {communities.map((community) => (
+                  <Link
+                    key={community.id}
+                    href={`/communities/${community.slug}`}
+                    className="group flex flex-col overflow-hidden rounded-[1.5rem] bg-white transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_16px_38px_rgba(23,56,42,0.08)]"
+                  >
+                    {/* IMAGE */}
+                    <div className="relative aspect-[1.2/1] shrink-0 overflow-hidden bg-sage">
+                      <img
+                        src={getImage(community)}
+                        alt={community.name}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      />
+
+                      <div className="absolute left-4 top-4">
+                        <span className="inline-flex rounded-full bg-ivory/90 px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.12em] text-forest backdrop-blur-md">
+                          {community.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="flex min-h-[205px] flex-1 flex-col p-5">
+                      <div className="min-h-[54px]">
+                        <h2 className="line-clamp-2 font-display text-[1.6rem] leading-[0.98] tracking-[-0.035em] text-forest">
+                          {community.name}
+                        </h2>
+                      </div>
+
+                      <p className="mt-1.5 h-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-gold">
+                        {community.memberCount}{" "}
+                        {community.memberCount === 1
+                          ? "member"
+                          : "members"}
+                      </p>
+
+                      <p className="mt-3 line-clamp-2 h-10 text-xs leading-5 text-forest/45">
+                        {community.description ||
+                          "Discover people, stories, and experiences within this community."}
+                      </p>
+
+                      <div className="mt-auto border-t border-forest/8 pt-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[10px] font-semibold text-forest transition-colors group-hover:text-gold">
+                            Explore community
+                          </span>
+
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-[10px] font-semibold text-forest transition-colors group-hover:bg-gold">
+                            {getInitial(community.name)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* =====================================================
+            BOTTOM CTA
+        ====================================================== */}
+        {!loading &&
+          !errorMessage &&
+          communities.length > 0 && (
+            <section className="mt-8 rounded-[1.5rem] bg-sage/55 px-5 py-6 md:mt-14 md:rounded-[1.75rem] md:px-8 md:py-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-gold md:text-[9px]">
+                    Beyond the festival
+                  </p>
+
+                  <h2 className="mt-1.5 max-w-xl font-display text-xl leading-[1.05] tracking-[-0.035em] text-forest md:text-3xl">
+                    Some connections continue long after JCWF.
+                  </h2>
+                </div>
+
+                <Link
+                  href="/#activities"
+                  className="inline-flex w-fit shrink-0 rounded-full bg-forest px-4 py-2.5 text-[10px] font-semibold text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-forest md:px-6 md:py-3.5 md:text-sm"
+                >
+                  Explore JCWF
+                </Link>
+              </div>
+            </section>
+          )}
+      </div>
+
+      {/* =====================================================
+          FOOTER
+      ====================================================== */}
+      <footer className="mx-auto max-w-[1440px] px-5 pb-7 pt-6 md:px-10 md:pt-7 lg:px-14">
+        <div className="flex flex-col gap-2 border-t border-forest/8 pt-5 text-[9px] text-forest/30 sm:flex-row sm:items-center sm:justify-between md:text-xs">
+          <p>
+            JCWF 2026 · Jogja Cultural Wellness Festival
+          </p>
+
+          <p>
+            Reconnecting — People, Culture & Wellbeing
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

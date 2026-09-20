@@ -38,19 +38,13 @@ export default function CommunityDetailPage() {
 
   const slug = params.slug as string;
 
-  const [community, setCommunity] =
-    useState<Community | null>(null);
-
+  const [community, setCommunity] = useState<Community | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
-
   const [memberCount, setMemberCount] = useState(0);
-
   const [joined, setJoined] = useState(false);
 
   const [loading, setLoading] = useState(true);
-
   const [joining, setJoining] = useState(false);
-
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -59,19 +53,14 @@ export default function CommunityDetailPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `/api/communities/${slug}`,
-          {
-            cache: "no-store",
-          }
-        );
+        const response = await fetch(`/api/communities/${slug}`, {
+          cache: "no-store",
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.error || "Community not found"
-          );
+          throw new Error(data.error || "Community not found");
         }
 
         setCommunity(data.community);
@@ -79,7 +68,7 @@ export default function CommunityDetailPage() {
         setMemberCount(data.memberCount ?? 0);
         setJoined(data.joined ?? false);
       } catch (error) {
-        console.error(error);
+        console.error("FETCH COMMUNITY ERROR:", error);
 
         setError(
           error instanceof Error
@@ -105,18 +94,15 @@ export default function CommunityDetailPage() {
       setJoining(true);
       setError("");
 
-      const response = await fetch(
-        "/api/communities/join",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            communityId: community.id,
-          }),
-        }
-      );
+      const response = await fetch("/api/communities/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          communityId: community.id,
+        }),
+      });
 
       const data = await response.json();
 
@@ -135,14 +121,9 @@ export default function CommunityDetailPage() {
       }
 
       setJoined(true);
-
-      // Update jumlah member
       setMemberCount((current) => current + 1);
-
-      // Tidak perlu fetch /api/me.
-      // Button langsung berubah menjadi Joined ✓.
     } catch (error) {
-      console.error(error);
+      console.error("JOIN COMMUNITY ERROR:", error);
 
       setError(
         error instanceof Error
@@ -154,34 +135,67 @@ export default function CommunityDetailPage() {
     }
   }
 
+  /* ==========================================================
+     LOADING
+  ========================================================== */
+
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F8F7F3] text-[#151515]">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-          <p className="text-sm text-black/40">
-            Loading community...
-          </p>
+      <main className="min-h-screen bg-ivory text-forest">
+        <header className="border-b border-forest/6">
+          <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 md:h-[76px] md:px-10 lg:px-14">
+            <div className="h-9 w-28 animate-pulse rounded-full bg-sage/50" />
+
+            <div className="h-9 w-20 animate-pulse rounded-full bg-sage/50" />
+          </div>
+        </header>
+
+        <div className="mx-auto max-w-[1100px] px-5 py-8 md:px-10 md:py-14">
+          <div className="grid gap-7 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+            <div className="aspect-[1.15/0.9] animate-pulse rounded-[1.5rem] bg-sage/55" />
+
+            <div>
+              <div className="h-3 w-28 animate-pulse rounded-full bg-sage/60" />
+
+              <div className="mt-5 h-20 max-w-lg animate-pulse rounded-2xl bg-sage/50" />
+
+              <div className="mt-5 h-12 max-w-xl animate-pulse rounded-2xl bg-sage/40" />
+
+              <div className="mt-7 h-11 w-36 animate-pulse rounded-full bg-sage/55" />
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
+  /* ==========================================================
+     ERROR
+  ========================================================== */
+
   if (error && !community) {
     return (
-      <main className="min-h-screen bg-[#F8F7F3] text-[#151515]">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
+      <main className="min-h-screen bg-ivory text-forest">
+        <div className="mx-auto flex min-h-screen max-w-[1100px] flex-col justify-center px-5 py-20 md:px-10">
           <Link
             href="/communities"
-            className="text-sm text-black/50 transition hover:text-black"
+            className="inline-flex w-fit items-center gap-1.5 rounded-full border border-forest/10 bg-white/70 px-4 py-2.5 text-xs font-semibold text-forest shadow-[0_5px_18px_rgba(23,56,42,0.05)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-sage"
           >
-            ← Back to communities
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
           </Link>
 
-          <h1 className="mt-10 text-3xl font-medium">
-            Community not found
+          <p className="mt-12 text-[9px] font-semibold uppercase tracking-[0.2em] text-gold">
+            Community
+          </p>
+
+          <h1 className="mt-3 font-display text-5xl leading-[0.9] tracking-[-0.05em] md:text-7xl">
+            Community
+            <br />
+            not found.
           </h1>
 
-          <p className="mt-3 text-black/50">
+          <p className="mt-5 max-w-md text-sm leading-6 text-forest/45">
             {error}
           </p>
         </div>
@@ -199,207 +213,239 @@ export default function CommunityDetailPage() {
     "/images/activity-community.jpg";
 
   return (
-    <main className="min-h-screen bg-[#F8F7F3] text-[#151515]">
-      {/* Header */}
-      <header className="h-20">
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6 lg:px-10">
+    <main className="min-h-screen bg-ivory text-forest">
+      {/* ========================================================
+          HEADER
+      ========================================================= */}
+      <header className="border-b border-forest/6 bg-ivory/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-[66px] max-w-[1100px] items-center justify-between px-5 md:h-[72px] md:px-8">
           <Link
             href="/communities"
-            className="text-sm text-black/50 transition hover:text-black"
+            className="inline-flex items-center gap-1.5 rounded-full border border-forest/10 bg-white/70 px-4 py-2.5 text-xs font-semibold text-forest shadow-[0_5px_18px_rgba(23,56,42,0.05)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-sage"
           >
-            ← Communities
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
           </Link>
 
           <Link
             href="/my"
-            className="text-sm text-black/50 transition hover:text-black"
+            className="rounded-full bg-forest px-4 py-2.5 text-[10px] font-semibold text-ivory transition-all hover:bg-gold hover:text-forest md:px-5 md:text-xs"
           >
-            My
+            My JCWF
           </Link>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-7xl px-6 pb-20 pt-8 lg:px-10 lg:pb-28">
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          {/* Image */}
-          <div className="overflow-hidden rounded-[28px] bg-black/5">
+      {/* ========================================================
+          HERO
+      ========================================================= */}
+      <section className="mx-auto max-w-[1100px] px-5 pb-12 pt-7 md:px-8 md:pb-16 md:pt-12">
+        <div className="grid gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-12">
+          {/* IMAGE */}
+          <div className="overflow-hidden rounded-[1.5rem] bg-sage md:rounded-[1.75rem]">
             <img
               src={image}
               alt={community.name}
-              className="aspect-[4/3] h-full w-full object-cover"
+              className="aspect-[1.15/0.9] w-full object-cover"
             />
           </div>
 
-          {/* Content */}
-          <div className="lg:pb-4">
-            <p className="text-sm uppercase tracking-[0.18em] text-black/40">
+          {/* CONTENT */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-gold md:text-[10px]">
+                JCWF Community
+              </p>
+            </div>
+
+            <p className="mt-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-forest/35">
               {community.category}
             </p>
 
-            <h1 className="mt-5 max-w-xl text-5xl font-medium leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+            <h1 className="mt-2 max-w-2xl font-display text-[clamp(2.8rem,6vw,5.8rem)] font-medium leading-[0.88] tracking-[-0.06em] text-forest">
               {community.name}
             </h1>
 
             {community.description && (
-              <p className="mt-7 max-w-lg text-base leading-7 text-black/60">
+              <p className="mt-5 max-w-xl text-xs leading-5 text-forest/50 md:text-sm md:leading-6">
                 {community.description}
               </p>
             )}
 
-            {/* Join Button */}
-            <div className="mt-9">
+            {/* JOIN + COUNT */}
+            <div className="mt-6 flex flex-wrap items-center gap-2.5">
               {joined ? (
                 <button
                   type="button"
                   disabled
-                  className="rounded-full bg-[#151515] px-7 py-3.5 text-sm font-medium text-white"
+                  className="rounded-full bg-gold px-5 py-3 text-xs font-semibold text-forest"
                 >
-                  Joined ✓
+                  Joined
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={handleJoin}
                   disabled={joining}
-                  className="rounded-full bg-[#151515] px-7 py-3.5 text-sm font-medium text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-forest px-5 py-3 text-xs font-semibold text-ivory transition-all hover:-translate-y-0.5 hover:bg-gold hover:text-forest disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {joining
-                    ? "Joining..."
-                    : "Join Community"}
+                  {joining ? "Joining..." : "Join Community"}
                 </button>
               )}
 
-              {error && (
-                <p className="mt-3 text-sm text-red-500">
-                  {error}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Details */}
-      <section className="border-t border-black/10">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
-          <div className="grid gap-12 lg:grid-cols-3">
-            {/* About */}
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-black/40">
-                About
-              </p>
-
-              <p className="mt-4 max-w-md text-sm leading-7 text-black/60">
-                A community connected through shared
-                interests, experiences, and activities at
-                JCWF 2026.
-              </p>
-            </div>
-
-            {/* Category */}
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-black/40">
-                Category
-              </p>
-
-              <p className="mt-4 text-lg">
-                {community.category}
-              </p>
-            </div>
-
-            {/* Members */}
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-black/40">
-                Members
-              </p>
-
-              <p className="mt-4 text-lg">
+              <span className="rounded-full border border-forest/10 bg-white/60 px-4 py-3 text-[10px] font-semibold text-forest/50 backdrop-blur-md">
                 {memberCount}{" "}
-                {memberCount === 1
-                  ? "member"
-                  : "members"}
-              </p>
+                {memberCount === 1 ? "member" : "members"}
+              </span>
             </div>
+
+            {error && (
+              <p className="mt-3 text-xs text-red-500">
+                {error}
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Members */}
-      <section className="border-t border-black/10">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-black/40">
-                Community
-              </p>
+      {/* ========================================================
+          INFO STRIP
+      ========================================================= */}
+      <section className="border-y border-forest/8 bg-sage/35">
+        <div className="mx-auto grid max-w-[1100px] grid-cols-2 md:grid-cols-3">
+          <div className="px-5 py-5 md:px-8 md:py-6">
+            <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-forest/35">
+              Category
+            </p>
 
-              <h2 className="mt-3 text-3xl font-medium tracking-[-0.03em]">
-                Members
-              </h2>
-            </div>
-
-            <p className="text-sm text-black/40">
-              {memberCount}{" "}
-              {memberCount === 1
-                ? "person"
-                : "people"}
+            <p className="mt-1.5 text-sm font-medium text-forest md:text-base">
+              {community.category}
             </p>
           </div>
 
-          {members.length === 0 ? (
-            <div className="mt-10 border-y border-black/10 py-10">
-              <p className="text-sm text-black/40">
-                No members yet. Be the first to join.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-10 divide-y divide-black/10 border-y border-black/10">
-              {members.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between gap-6 py-5"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {member.fullName}
-                    </p>
+          <div className="border-l border-forest/8 px-5 py-5 md:px-8 md:py-6">
+            <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-forest/35">
+              Members
+            </p>
 
-                    <p className="mt-1 text-xs text-black/40">
-                      {member.reconnectId}
-                    </p>
-                  </div>
+            <p className="mt-1.5 text-sm font-medium text-forest md:text-base">
+              {memberCount}
+            </p>
+          </div>
 
-                  {member.city && (
-                    <p className="text-sm text-black/40">
-                      {member.city}
-                    </p>
-                  )}
+          <div className="hidden border-l border-forest/8 px-8 py-6 md:block">
+            <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-forest/35">
+              Festival
+            </p>
+
+            <p className="mt-1.5 text-sm font-medium text-forest md:text-base">
+              JCWF 2026
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          MEMBERS
+      ========================================================= */}
+      <section className="mx-auto max-w-[1100px] px-5 py-12 md:px-8 md:py-16">
+        <div className="flex items-end justify-between gap-5">
+          <div>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-gold">
+              Community
+            </p>
+
+            <h2 className="mt-2 font-display text-3xl leading-none tracking-[-0.045em] text-forest md:text-4xl">
+              Members
+            </h2>
+          </div>
+
+          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-forest/30 md:text-[10px]">
+            {memberCount}{" "}
+            {memberCount === 1 ? "person" : "people"}
+          </p>
+        </div>
+
+        {members.length === 0 ? (
+          <div className="mt-6 rounded-[1.25rem] bg-sage/40 px-5 py-7">
+            <p className="text-xs leading-5 text-forest/45">
+              No members yet. Be the first to join this community.
+            </p>
+
+            {!joined && (
+              <button
+                type="button"
+                onClick={handleJoin}
+                disabled={joining}
+                className="mt-4 rounded-full bg-forest px-5 py-2.5 text-[10px] font-semibold text-ivory transition-all hover:bg-gold hover:text-forest disabled:opacity-50"
+              >
+                {joining ? "Joining..." : "Join Community"}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 overflow-hidden rounded-[1.25rem] bg-white">
+            {members.map((member, index) => (
+              <div
+                key={member.id}
+                className={`flex items-center gap-3.5 px-4 py-3.5 md:px-5 ${
+                  index !== members.length - 1
+                    ? "border-b border-forest/7"
+                    : ""
+                }`}
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-[10px] font-bold text-forest md:h-10 md:w-10 md:text-xs">
+                  {member.fullName.charAt(0).toUpperCase()}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[11px] font-semibold text-forest md:text-xs">
+                    {member.fullName}
+                  </p>
+
+                  <p className="mt-0.5 truncate text-[8px] text-forest/30 md:text-[9px]">
+                    {member.reconnectId}
+                  </p>
+                </div>
+
+                {member.city && (
+                  <p className="hidden text-[9px] text-forest/35 sm:block md:text-[10px]">
+                    {member.city}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Links */}
-      {(community.instagramUrl ||
-        community.websiteUrl) && (
-        <section className="border-t border-black/10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-10 sm:flex-row sm:items-center sm:justify-between lg:px-10">
-            <p className="text-sm text-black/40">
-              Find this community online
-            </p>
+      {/* ========================================================
+          SOCIAL LINKS
+      ========================================================= */}
+      {(community.instagramUrl || community.websiteUrl) && (
+        <section className="border-t border-forest/8 bg-sage/25">
+          <div className="mx-auto flex max-w-[1100px] flex-col gap-4 px-5 py-7 sm:flex-row sm:items-center sm:justify-between md:px-8">
+            <div>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-gold">
+                Stay connected
+              </p>
 
-            <div className="flex gap-6">
+              <p className="mt-1 font-display text-lg tracking-[-0.025em] text-forest md:text-xl">
+                Find this community online.
+              </p>
+            </div>
+
+            <div className="flex gap-2">
               {community.instagramUrl && (
                 <a
                   href={community.instagramUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm transition hover:opacity-50"
+                  className="rounded-full border border-forest/10 bg-white/65 px-4 py-2.5 text-[9px] font-semibold text-forest backdrop-blur-md transition-all hover:bg-gold"
                 >
-                  Instagram ↗
+                  Instagram
                 </a>
               )}
 
@@ -408,15 +454,26 @@ export default function CommunityDetailPage() {
                   href={community.websiteUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm transition hover:opacity-50"
+                  className="rounded-full border border-forest/10 bg-white/65 px-4 py-2.5 text-[9px] font-semibold text-forest backdrop-blur-md transition-all hover:bg-gold"
                 >
-                  Website ↗
+                  Website
                 </a>
               )}
             </div>
           </div>
         </section>
       )}
+
+      {/* ========================================================
+          FOOTER
+      ========================================================= */}
+      <footer className="mx-auto max-w-[1100px] px-5 pb-6 pt-5 md:px-8">
+        <div className="flex flex-col gap-1.5 border-t border-forest/8 pt-5 text-[8px] text-forest/30 sm:flex-row sm:items-center sm:justify-between md:text-[9px]">
+          <p>JCWF 2026 · Jogja Cultural Wellness Festival</p>
+
+          <p>Reconnecting — People, Culture & Wellbeing</p>
+        </div>
+      </footer>
     </main>
   );
 }

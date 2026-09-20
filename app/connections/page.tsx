@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Html5Qrcode } from "html5-qrcode";
 
@@ -44,21 +39,18 @@ export default function ConnectionsPage() {
   const [connecting, setConnecting] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
-
-  /* =================================================
-     LOAD CONNECTIONS
-  ================================================= */
 
   const loadConnections = useCallback(async () => {
     try {
       const response = await fetch("/api/connections");
 
       if (response.status === 401) {
-        window.location.href =
-          "/login?redirect=/connections";
+        window.location.href = "/login?redirect=/connections";
         return;
       }
 
@@ -68,10 +60,7 @@ export default function ConnectionsPage() {
         setConnections(data.connections ?? []);
       }
     } catch (error) {
-      console.error(
-        "LOAD CONNECTIONS ERROR:",
-        error
-      );
+      console.error("LOAD CONNECTIONS ERROR:", error);
     } finally {
       setLoading(false);
     }
@@ -81,17 +70,14 @@ export default function ConnectionsPage() {
     loadConnections();
   }, [loadConnections]);
 
-  /* =================================================
-     FIND PARTICIPANT
-  ================================================= */
-
   const findParticipant = useCallback(
     async (value?: string) => {
-      const cleanId = (
-        value ?? reconnectId
-      ).trim();
+      const cleanId = (value ?? reconnectId).trim();
 
-      if (!cleanId) return;
+      if (!cleanId) {
+        setMessage("Masukkan Reconnect ID terlebih dahulu.");
+        return;
+      }
 
       setSearching(true);
       setMessage("");
@@ -99,33 +85,20 @@ export default function ConnectionsPage() {
 
       try {
         const response = await fetch(
-          `/api/connections/search?reconnectId=${encodeURIComponent(
-            cleanId
-          )}`
+          `/api/connections/search?reconnectId=${encodeURIComponent(cleanId)}`
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          setMessage(
-            data.error ??
-              "Participant tidak ditemukan."
-          );
+          setMessage(data.error ?? "Participant tidak ditemukan.");
           return;
         }
 
-        setSelectedParticipant(
-          data.participant
-        );
+        setSelectedParticipant(data.participant);
       } catch (error) {
-        console.error(
-          "FIND PARTICIPANT ERROR:",
-          error
-        );
-
-        setMessage(
-          "Terjadi kesalahan. Coba lagi."
-        );
+        console.error("FIND PARTICIPANT ERROR:", error);
+        setMessage("Terjadi kesalahan. Coba lagi.");
       } finally {
         setSearching(false);
       }
@@ -133,9 +106,28 @@ export default function ConnectionsPage() {
     [reconnectId]
   );
 
-  /* =================================================
-     HANDLE QR RESULT
-  ================================================= */
+  const closeCamera = useCallback(async () => {
+    const scanner = scannerRef.current;
+
+    setCameraLoading(false);
+    setCameraOpen(false);
+
+    if (!scanner) return;
+
+    try {
+      await scanner.stop();
+    } catch (error) {
+      console.error("STOP CAMERA ERROR:", error);
+    }
+
+    try {
+      scanner.clear();
+    } catch (error) {
+      console.error("CLEAR CAMERA ERROR:", error);
+    }
+
+    scannerRef.current = null;
+  }, []);
 
   const handleQrResult = useCallback(
     async (decodedText: string) => {
@@ -143,173 +135,65 @@ export default function ConnectionsPage() {
 
       if (!scannedId) return;
 
-      console.log(
-        "SCANNED RECONNECT ID:",
-        scannedId
-      );
-
       setReconnectId(scannedId);
       setMessage("");
 
-      // Tutup kamera setelah QR berhasil terbaca
-      await stopScanner();
-
-      // Cari participant berdasarkan hasil scan
+      await closeCamera();
       await findParticipant(scannedId);
     },
-    [findParticipant]
+    [closeCamera, findParticipant]
   );
 
-  /* =================================================
-     STOP SCANNER
-  ================================================= */
+  const openCamera = async () => {
+    if (cameraOpen || cameraLoading) return;
 
-  const stopScanner = useCallback(
-    async () => {
-      const scanner = scannerRef.current;
-
-      if (!scanner) {
-        setScannerOpen(false);
-        return;
-      }
-
-      try {
-        await scanner.stop();
-      } catch (error) {
-        console.error(
-          "STOP CONNECTION SCANNER ERROR:",
-          error
-        );
-      }
-
-      try {
-        scanner.clear();
-      } catch (error) {
-        console.error(
-          "CLEAR CONNECTION SCANNER ERROR:",
-          error
-        );
-      }
-
-      scannerRef.current = null;
-      setScannerOpen(false);
-    },
-    []
-  );
-
-  /* =================================================
-     OPEN SCANNER
-  ================================================= */
-
-  const startScanner = () => {
     setMessage("");
     setSelectedParticipant(null);
+    setCameraLoading(true);
 
-    // Jangan langsung instantiate Html5Qrcode di sini.
-    // Biarkan React render element scanner terlebih dahulu.
-    setScannerOpen(true);
-  };
-
-  /* =================================================
-     INITIALIZE CAMERA AFTER ELEMENT EXISTS
-  ================================================= */
-
-  useEffect(() => {
-    if (!scannerOpen) return;
-
-    let cancelled = false;
-
-    async function openCamera() {
-      /*
-       * Tunggu satu render cycle agar:
-       *
-       * <div id="jcwf-connection-qr-reader">
-       *
-       * benar-benar sudah masuk DOM.
-       */
+    try {
       await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
+        requestAnimationFrame(() => resolve());
       });
 
-      if (cancelled) return;
-
-      const element =
-        document.getElementById(
-          scannerRegionId
-        );
+      const element = document.getElementById(scannerRegionId);
 
       if (!element) {
-        console.error(
-          "CONNECTION SCANNER ELEMENT NOT FOUND"
-        );
-
-        setScannerOpen(false);
-
-        setMessage(
-          "Scanner gagal dibuka. Silakan coba lagi."
-        );
-
-        return;
+        throw new Error("Scanner element not found.");
       }
 
-      // Safety: jangan buat scanner kedua
-      if (scannerRef.current) {
-        return;
-      }
+      const scanner = new Html5Qrcode(scannerRegionId);
 
-      try {
-        const scanner = new Html5Qrcode(
-          scannerRegionId
-        );
+      scannerRef.current = scanner;
 
-        scannerRef.current = scanner;
-
-        await scanner.start(
-          {
-            facingMode: "environment",
+      await scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: {
+            width: 220,
+            height: 220,
           },
-          {
-            fps: 10,
-            qrbox: {
-              width: 240,
-              height: 240,
-            },
-            aspectRatio: 1,
-          },
-          handleQrResult,
-          () => {
-            // QR belum terbaca.
-            // Error scanning kontinu diabaikan.
-          }
-        );
-      } catch (error) {
-        console.error(
-          "START CONNECTION SCANNER ERROR:",
-          error
-        );
+          aspectRatio: 1,
+        },
+        handleQrResult,
+        () => {}
+      );
 
-        scannerRef.current = null;
+      setCameraOpen(true);
+    } catch (error) {
+      console.error("OPEN CAMERA ERROR:", error);
 
-        setScannerOpen(false);
+      scannerRef.current = null;
+      setCameraOpen(false);
 
-        setMessage(
-          "Kamera tidak dapat dibuka. Pastikan izin kamera sudah diberikan."
-        );
-      }
+      setMessage(
+        "Kamera tidak dapat dibuka. Pastikan izin kamera sudah diberikan."
+      );
+    } finally {
+      setCameraLoading(false);
     }
-
-    openCamera();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [scannerOpen, handleQrResult]);
-
-  /* =================================================
-     CLEANUP CAMERA
-  ================================================= */
+  };
 
   useEffect(() => {
     return () => {
@@ -323,10 +207,6 @@ export default function ConnectionsPage() {
     };
   }, []);
 
-  /* =================================================
-     CONNECT PARTICIPANT
-  ================================================= */
-
   async function connectParticipant() {
     if (!selectedParticipant) return;
 
@@ -334,27 +214,25 @@ export default function ConnectionsPage() {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "/api/connections",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            participantId:
-              selectedParticipant.id,
-          }),
-        }
-      );
+      const response = await fetch("/api/connections", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          participantId: selectedParticipant.id,
+        }),
+      });
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        window.location.href = "/login?redirect=/connections";
+        return;
+      }
+
       if (!response.ok) {
-        setMessage(
-          data.error ??
-            "Gagal melakukan connection."
-        );
+        setMessage(data.error ?? "Gagal melakukan connection.");
         return;
       }
 
@@ -369,379 +247,409 @@ export default function ConnectionsPage() {
 
       await loadConnections();
     } catch (error) {
-      console.error(
-        "CONNECT PARTICIPANT ERROR:",
-        error
-      );
-
-      setMessage(
-        "Terjadi kesalahan. Coba lagi."
-      );
+      console.error("CONNECT PARTICIPANT ERROR:", error);
+      setMessage("Terjadi kesalahan. Coba lagi.");
     } finally {
       setConnecting(false);
     }
   }
 
-  /* =================================================
-     RENDER
-  ================================================= */
-
   return (
-    <main className="min-h-screen bg-[#F7F3E8] text-[#17382A]">
-      {/* =================================================
-          HEADER
-      ================================================= */}
+    <main className="min-h-screen bg-ivory text-forest">
+      {/* Header */}
+      <header className="border-b border-forest/8 bg-ivory/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-5 py-4 md:px-8 md:py-5">
+          <Link
+            href="/my"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-forest/10 bg-white/60 text-lg text-forest transition-all hover:-translate-y-0.5 hover:bg-sage"
+            aria-label="Back to My JCWF"
+          >
+            ←
+          </Link>
 
-      <header className="border-b border-[#17382A]/10 bg-[#F7F3E8]">
-        <div className="mx-auto flex h-[76px] max-w-[1100px] items-center justify-between px-5 sm:px-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/my"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#17382A] text-[#F7F3E8] transition hover:bg-[#214B39]"
-            >
-              ←
-            </Link>
-
-            <div>
-              <p className="font-display text-xl font-semibold">
-                My Connections
-              </p>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] opacity-50">
-                Reconnect with people
-              </p>
-            </div>
+          <div className="text-center">
+            <p className="font-display text-lg leading-none text-forest md:text-xl">
+              My Connections
+            </p>
+            <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-forest/35">
+              Reconnect with people
+            </p>
           </div>
+
+          <Link
+            href="/my"
+            className="rounded-full border border-forest/10 bg-white/60 px-4 py-2 text-[10px] font-semibold text-forest backdrop-blur-md transition hover:bg-sage"
+          >
+            My JCWF
+          </Link>
         </div>
       </header>
 
-      {/* =================================================
-          CONTENT
-      ================================================= */}
-
-      <div className="mx-auto max-w-[1100px] px-5 py-8 sm:px-8">
-        {/* =================================================
-            CONNECT CARD
-        ================================================= */}
-
-        <section className="rounded-[28px] bg-[#17382A] p-6 text-[#F7F3E8] shadow-sm sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9A441]">
+      <div className="mx-auto max-w-[900px] px-5 py-10 md:px-8 md:py-14">
+        {/* Intro */}
+        <section className="mb-8">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
             Connect
           </p>
 
-          <h1 className="mt-2 font-display text-3xl font-semibold">
-            Meet someone at JCWF.
+          <h1 className="max-w-2xl font-display text-[clamp(2.5rem,6vw,4.8rem)] font-medium leading-[0.92] tracking-[-0.045em]">
+            Meet someone.
+            <br />
+            <span className="text-gold">Stay connected.</span>
           </h1>
 
-          <p className="mt-2 max-w-xl text-sm leading-6 text-[#F7F3E8]/65">
-            Scan or enter someone&apos;s
-            Reconnect ID to connect with
-            them.
+          <p className="mt-5 max-w-xl text-sm leading-6 text-forest/55 md:text-[15px]">
+            Scan their Reconnect QR or enter their ID to connect after meeting
+            at JCWF.
           </p>
+        </section>
 
-          {/* =================================================
-              QR SCANNER
-          ================================================= */}
+        {/* Scanner */}
+        <section className="rounded-[2rem] bg-forest p-5 text-ivory shadow-[0_20px_55px_rgba(23,56,42,0.12)] sm:p-7 md:p-8">
+          {/* Scanner heading */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-gold">
+                Scan to connect
+              </p>
 
-          {scannerOpen && (
-            <div className="mt-6 overflow-hidden rounded-[28px] bg-[#0D241B]">
-              {/* SCANNER HEADER */}
-
-              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#D9A441]">
-                    QR Scanner
-                  </p>
-
-                  <p className="mt-1 font-display text-lg font-semibold text-[#F7F3E8]">
-                    Scan Reconnect ID
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={stopScanner}
-                  className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
-                >
-                  Close
-                </button>
-              </div>
-
-              {/* CAMERA */}
-
-              <div className="relative overflow-hidden">
-                <div
-                  id={scannerRegionId}
-                  className="min-h-[340px] w-full sm:min-h-[420px]"
-                />
-
-                {/* CUSTOM SCAN FRAME */}
-
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="relative h-[240px] w-[240px]">
-                    {/* TOP LEFT */}
-
-                    <div className="absolute left-0 top-0 h-11 w-11 rounded-tl-2xl border-l-4 border-t-4 border-[#D9A441]" />
-
-                    {/* TOP RIGHT */}
-
-                    <div className="absolute right-0 top-0 h-11 w-11 rounded-tr-2xl border-r-4 border-t-4 border-[#D9A441]" />
-
-                    {/* BOTTOM LEFT */}
-
-                    <div className="absolute bottom-0 left-0 h-11 w-11 rounded-bl-2xl border-b-4 border-l-4 border-[#D9A441]" />
-
-                    {/* BOTTOM RIGHT */}
-
-                    <div className="absolute bottom-0 right-0 h-11 w-11 rounded-br-2xl border-b-4 border-r-4 border-[#D9A441]" />
-
-                    {/* SCAN LINE */}
-
-                    <div className="absolute left-5 right-5 top-1/2 h-[2px] bg-[#D9A441]/70" />
-                  </div>
-                </div>
-              </div>
-
-              {/* INSTRUCTION */}
-
-              <div className="border-t border-white/10 px-5 py-4 text-center">
-                <p className="text-xs leading-5 text-white/50">
-                  Arahkan kamera ke QR Code
-                  Reconnect ID peserta.
-                </p>
-              </div>
+              <h2 className="mt-2 font-display text-3xl leading-none tracking-[-0.03em] text-white md:text-4xl">
+                Reconnect QR
+              </h2>
             </div>
-          )}
-
-          {/* =================================================
-              MANUAL INPUT
-          ================================================= */}
-
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <input
-              value={reconnectId}
-              onChange={(event) =>
-                setReconnectId(
-                  event.target.value
-                )
-              }
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  findParticipant();
-                }
-              }}
-              placeholder="Enter Reconnect ID"
-              className="h-12 flex-1 rounded-2xl border border-white/10 bg-white px-4 text-sm text-[#17382A] outline-none placeholder:text-[#17382A]/35 focus:border-[#D9A441]"
-            />
 
             <button
               type="button"
-              onClick={() =>
-                findParticipant()
-              }
-              disabled={
-                searching ||
-                !reconnectId.trim()
-              }
-              className="h-12 rounded-2xl bg-[#D9A441] px-6 text-sm font-bold text-[#17382A] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setShowGuide((current) => !current)}
+              aria-label="How to use scanner"
+              aria-expanded={showGuide}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition-all ${
+                showGuide
+                  ? "border-gold bg-gold text-forest"
+                  : "border-white/15 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10"
+              }`}
             >
-              {searching
-                ? "Searching..."
-                : "Find Participant"}
+              ?
             </button>
           </div>
 
-          {/* =================================================
-              SCAN BUTTON
-          ================================================= */}
-
-          {!scannerOpen && (
-            <button
-              type="button"
-              onClick={startScanner}
-              className="mt-3 flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-[#D9A441]/40 bg-[#D9A441]/10 px-5 text-sm font-bold text-[#D9A441] transition hover:bg-[#D9A441]/15"
-            >
-              <span className="text-lg">
-                ⌁
-              </span>
-
-              Scan Reconnect ID
-            </button>
-          )}
-
-          {/* =================================================
-              MESSAGE
-          ================================================= */}
-
-          {message && (
-            <div className="mt-4 rounded-2xl bg-[#D9A441]/10 px-4 py-3">
-              <p className="text-sm text-[#D9A441]">
-                {message}
-              </p>
-            </div>
-          )}
-
-          {/* =================================================
-              PARTICIPANT PREVIEW
-          ================================================= */}
-
-          {selectedParticipant && (
-            <div className="mt-6 rounded-[24px] bg-white p-5 text-[#17382A]">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#17382A]/40">
-                Participant found
-              </p>
-
-              <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="font-display text-2xl font-semibold">
-                    {
-                      selectedParticipant.fullName
-                    }
-                  </h2>
-
-                  <p className="mt-1 text-sm text-[#17382A]/50">
-                    {
-                      selectedParticipant.reconnectId
-                    }
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {selectedParticipant.city && (
-                      <span className="rounded-full bg-[#F7F3E8] px-3 py-1 text-xs font-semibold">
-                        {
-                          selectedParticipant.city
-                        }
-                      </span>
-                    )}
-
-                    {selectedParticipant.interestCategory && (
-                      <span className="rounded-full bg-[#F7F3E8] px-3 py-1 text-xs font-semibold">
-                        {
-                          selectedParticipant.interestCategory
-                        }
-                      </span>
-                    )}
+          {/* Guide */}
+          {showGuide && (
+            <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.045] p-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  {
+                    number: "01",
+                    text: "Buka QR Reconnect milik peserta.",
+                  },
+                  {
+                    number: "02",
+                    text: "Buka kamera lalu arahkan ke QR.",
+                  },
+                  {
+                    number: "03",
+                    text: "Review profil lalu pilih Connect.",
+                  },
+                ].map((step) => (
+                  <div key={step.number} className="flex gap-3">
+                    <span className="text-[9px] font-bold text-gold">
+                      {step.number}
+                    </span>
+                    <p className="text-[11px] leading-5 text-white/55">
+                      {step.text}
+                    </p>
                   </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={
-                    connectParticipant
-                  }
-                  disabled={connecting}
-                  className="rounded-2xl bg-[#17382A] px-6 py-3 text-sm font-bold text-[#F7F3E8] transition hover:bg-[#214B39] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {connecting
-                    ? "Connecting..."
-                    : "Connect"}
-                </button>
+                ))}
               </div>
             </div>
           )}
+
+          {/* Camera */}
+          <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#102F24]">
+            <div className="relative aspect-square w-full max-w-[430px] mx-auto">
+              <div
+                id={scannerRegionId}
+                className={`absolute inset-0 overflow-hidden ${
+                  cameraOpen ? "block" : "hidden"
+                }`}
+              />
+
+              {!cameraOpen && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="h-7 w-7 text-white/45"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 7.5A1.5 1.5 0 0 1 5.5 6h2l1.2-1.5h4.6L14.5 6h2A1.5 1.5 0 0 1 18 7.5v9A1.5 1.5 0 0 1 16.5 18h-11A1.5 1.5 0 0 1 4 16.5z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle cx="12" cy="12" r="3.25" />
+                    </svg>
+                  </div>
+
+                  <p className="mt-4 text-sm font-medium text-white/70">
+                    Kamera belum dibuka
+                  </p>
+
+                  <p className="mt-1 text-[10px] leading-5 text-white/35">
+                    Buka kamera untuk scan Reconnect QR.
+                  </p>
+                </div>
+              )}
+
+              {cameraOpen && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="relative h-[220px] w-[220px] rounded-[1.5rem] border-2 border-gold/90">
+                    <span className="absolute -left-[2px] -top-[2px] h-7 w-7 rounded-tl-xl border-l-4 border-t-4 border-gold" />
+                    <span className="absolute -right-[2px] -top-[2px] h-7 w-7 rounded-tr-xl border-r-4 border-t-4 border-gold" />
+                    <span className="absolute -bottom-[2px] -left-[2px] h-7 w-7 rounded-bl-xl border-b-4 border-l-4 border-gold" />
+                    <span className="absolute -bottom-[2px] -right-[2px] h-7 w-7 rounded-br-xl border-b-4 border-r-4 border-gold" />
+                  </div>
+                </div>
+              )}
+
+              {cameraLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#102F24]/80 backdrop-blur-sm">
+                  <p className="text-xs font-medium text-white/70">
+                    Opening camera...
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Camera control */}
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={cameraOpen ? closeCamera : openCamera}
+              disabled={cameraLoading}
+              className={`inline-flex h-11 items-center justify-center rounded-full px-6 text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                cameraOpen
+                  ? "border border-white/15 bg-white/10 text-white hover:bg-white/15"
+                  : "bg-gold text-forest hover:-translate-y-0.5 hover:bg-[#D8B45A]"
+              }`}
+            >
+              {cameraLoading
+                ? "Opening Camera..."
+                : cameraOpen
+                  ? "Close Camera"
+                  : "Open Camera"}
+            </button>
+          </div>
+
+          <p className="mt-3 text-center text-[10px] text-white/35">
+            Kamu bisa menutup kamera kapan saja setelah selesai scan.
+          </p>
+
+          {/* Divider */}
+          <div className="mt-8">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/15" />
+
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                atau masukkan ID
+              </span>
+
+              <div className="h-px flex-1 bg-white/15" />
+            </div>
+
+            {/* Manual ID */}
+            <div className="mt-5 px-1 sm:px-2">
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={reconnectId}
+                  onChange={(event) => setReconnectId(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      findParticipant();
+                    }
+                  }}
+                  placeholder="Masukkan Reconnect ID"
+                  className="h-[52px] w-full rounded-[1.1rem] border border-gold/80 bg-white px-5 text-[15px] text-forest outline-none placeholder:text-forest/30 focus:border-gold focus:ring-2 focus:ring-gold/15"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => findParticipant()}
+                  disabled={searching}
+                  className="h-[50px] w-full rounded-[1.1rem] bg-gold px-5 text-sm font-semibold text-forest transition-colors hover:bg-[#D8B45A] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {searching ? "Finding..." : "Find ID"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Message */}
+          {message && (
+            <p className="mt-4 px-2 text-center text-xs leading-5 text-white/55">
+              {message}
+            </p>
+          )}
         </section>
 
-        {/* =================================================
-            CONNECTION LIST
-        ================================================= */}
+        {/* Participant result */}
+        {selectedParticipant && (
+          <section className="mt-5 rounded-[1.75rem] border border-forest/8 bg-white/65 p-5 shadow-[0_10px_35px_rgba(23,56,42,0.06)] backdrop-blur-md sm:p-6">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-gold">
+              Participant found
+            </p>
 
-        <section className="mt-8">
-          <div className="mb-5 flex items-end justify-between">
+            <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-sage font-display text-xl text-forest">
+                  {selectedParticipant.fullName.charAt(0).toUpperCase()}
+                </div>
+
+                <div>
+                  <h3 className="font-display text-2xl leading-none text-forest">
+                    {selectedParticipant.fullName}
+                  </h3>
+
+                  <p className="mt-1.5 text-[10px] font-medium text-forest/40">
+                    {selectedParticipant.reconnectId}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={connectParticipant}
+                disabled={connecting}
+                className="h-11 rounded-full bg-forest px-6 text-xs font-semibold text-ivory transition-all hover:-translate-y-0.5 hover:bg-[#244F3C] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {connecting ? "Connecting..." : "Connect"}
+              </button>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {selectedParticipant.city && (
+                <span className="rounded-full bg-sage/60 px-3 py-1.5 text-[10px] font-medium text-forest/65">
+                  {selectedParticipant.city}
+                </span>
+              )}
+
+              {selectedParticipant.interestCategory && (
+                <span className="rounded-full bg-gold/15 px-3 py-1.5 text-[10px] font-medium text-forest/65">
+                  {selectedParticipant.interestCategory}
+                </span>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* My Connections */}
+        <section className="mt-14">
+          <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#17382A]/40">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-gold">
                 Your network
               </p>
 
-              <h2 className="mt-1 font-display text-2xl font-semibold">
+              <h2 className="mt-2 font-display text-3xl leading-none tracking-[-0.03em] text-forest md:text-4xl">
                 My Connections
               </h2>
             </div>
 
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold">
-              {connections.length}
+            <span className="text-xs text-forest/35">
+              {connections.length}{" "}
+              {connections.length === 1 ? "connection" : "connections"}
             </span>
           </div>
 
-          {/* LOADING */}
-
-          {loading ? (
-            <div className="rounded-[24px] bg-white p-8 text-sm text-[#17382A]/50">
-              Loading connections...
-            </div>
-          ) : connections.length === 0 ? (
-            /* EMPTY */
-
-            <div className="rounded-[28px] border border-dashed border-[#17382A]/15 bg-white p-10 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F7F3E8] text-2xl">
-                ◌
+          <div className="mt-5">
+            {loading ? (
+              <div className="rounded-[1.5rem] bg-white/55 px-5 py-8 text-center text-xs text-forest/40">
+                Loading connections...
               </div>
+            ) : connections.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-forest/10 bg-white/35 px-6 py-10 text-center">
+                <p className="font-display text-xl text-forest">
+                  Belum ada connections.
+                </p>
 
-              <h3 className="mt-4 font-display text-xl font-semibold">
-                No connections yet
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#17382A]/50">
-                Meet people during JCWF
-                and connect with them using
-                their Reconnect ID.
-              </p>
-            </div>
-          ) : (
-            /* CONNECTIONS */
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {connections.map(
-                (connection) => {
-                  const person =
-                    connection.connected_participant;
+                <p className="mt-2 text-xs leading-5 text-forest/40">
+                  Scan QR atau masukkan Reconnect ID untuk mulai terhubung.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-[1.5rem] border border-forest/8 bg-white/55">
+                {connections.map((connection, index) => {
+                  const person = connection.connected_participant;
 
                   return (
                     <div
                       key={connection.id}
-                      className="rounded-[24px] bg-white p-5 shadow-sm"
+                      className={`flex items-center justify-between gap-4 px-5 py-4 ${
+                        index !== connections.length - 1
+                          ? "border-b border-forest/7"
+                          : ""
+                      }`}
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-display text-xl font-semibold">
-                            {
-                              person.full_name
-                            }
-                          </h3>
-
-                          <p className="mt-1 text-sm text-[#17382A]/45">
-                            {
-                              person.reconnect_id
-                            }
-                          </p>
+                      <div className="flex min-w-0 items-center gap-3.5">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sage font-display text-base text-forest">
+                          {person.full_name.charAt(0).toUpperCase()}
                         </div>
 
-                        <span className="rounded-full bg-[#DCE9DC] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#17382A]">
-                          Connected
-                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-forest">
+                            {person.full_name}
+                          </p>
+
+                          <p className="mt-0.5 truncate text-[10px] text-forest/35">
+                            {person.reconnect_id}
+                          </p>
+
+                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                            {person.city && (
+                              <span className="text-[9px] text-forest/40">
+                                {person.city}
+                              </span>
+                            )}
+
+                            {person.city && person.interest_category && (
+                              <span className="text-[9px] text-forest/20">
+                                •
+                              </span>
+                            )}
+
+                            {person.interest_category && (
+                              <span className="text-[9px] text-forest/40">
+                                {person.interest_category}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {person.city && (
-                          <span className="rounded-full bg-[#F7F3E8] px-3 py-1 text-xs font-medium">
-                            {person.city}
-                          </span>
-                        )}
-
-                        {person.interest_category && (
-                          <span className="rounded-full bg-[#F7F3E8] px-3 py-1 text-xs font-medium">
-                            {
-                              person.interest_category
-                            }
-                          </span>
-                        )}
-                      </div>
+                      <span className="shrink-0 rounded-full bg-sage/55 px-3 py-1.5 text-[9px] font-semibold text-forest/55">
+                        Connected
+                      </span>
                     </div>
                   );
-                }
-              )}
-            </div>
-          )}
+                })}
+              </div>
+            )}
+          </div>
         </section>
+
+        {/* Footer note */}
+        <div className="mt-14 border-t border-forest/8 pt-6 text-center">
+          <p className="text-[10px] leading-5 text-forest/30">
+            Your connections are private and only visible through your JCWF
+            account.
+          </p>
+        </div>
       </div>
     </main>
   );

@@ -96,7 +96,7 @@ export default async function TicketPage({
             href="/my"
             className="rounded-full bg-forest/5 px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest/10"
           >
-            ← My JCWF
+            My JCWF
           </Link>
         </div>
       </header>
@@ -240,7 +240,7 @@ export default async function TicketPage({
             className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-ivory transition hover:bg-gold hover:text-forest"
           >
             Back to My JCWF
-            <span>→</span>
+            
           </Link>
         </div>
       </div>

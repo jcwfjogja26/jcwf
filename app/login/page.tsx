@@ -2,13 +2,14 @@
 
 import {
   FormEvent,
+  Suspense,
   useState,
 } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 
-export default function LoginPage() {
+function LoginForm() {
   const { language } = useLanguage();
   const searchParams = useSearchParams();
 
@@ -39,19 +40,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "/api/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
       const data = await response.json();
 
@@ -65,17 +63,14 @@ export default function LoginPage() {
         return;
       }
 
-      const redirect =
-        searchParams.get("redirect");
+      const redirect = searchParams.get("redirect");
 
       const safeRedirect =
-        redirect &&
-        redirect.startsWith("/")
+        redirect && redirect.startsWith("/")
           ? redirect
           : "/my";
 
-      window.location.href =
-        safeRedirect;
+      window.location.href = safeRedirect;
     } catch (error) {
       console.error(error);
 
@@ -211,9 +206,7 @@ export default function LoginPage() {
                   className="w-full rounded-full bg-forest px-6 py-4 text-sm font-semibold text-ivory shadow-[0_10px_30px_rgba(23,56,42,0.12)] transition hover:-translate-y-0.5 hover:bg-gold hover:text-forest disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
-                    ? isEnglish
-                      ? "Logging in..."
-                      : "Logging in..."
+                    ? "Logging in..."
                     : "Login"}{" "}
                   →
                 </button>
@@ -237,5 +230,19 @@ export default function LoginPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function LoginFallback() {
+  return (
+    <main className="min-h-screen bg-ivory" />
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginForm />
+    </Suspense>
   );
 }

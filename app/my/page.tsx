@@ -8,6 +8,9 @@ import PassportQRCode from "@/components/home/PassportQRCode";
 import DailyTicketSection from "@/components/home/DailyTicketSection";
 import MyStoryCard from "@/components/my/MyStoryCard";
 import MyCollectionCard from "@/components/my/MyCollectionCard";
+import MyCollectionStamps from "@/components/my/MyCollectionStamps";
+
+
 
 /* =========================================================
    PILLARS
@@ -466,6 +469,7 @@ function Stamp({
   );
 }
 
+
 /* =========================================================
    PAGE
 ========================================================= */
@@ -922,7 +926,7 @@ export default async function MyPage() {
             />
 
             <a
-              href="#collection"
+              href="/my/collection"
               className="flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-[#315A3F]/45 transition hover:bg-[#315A3F]/[0.045] hover:text-[#315A3F]"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-[11px]">
@@ -935,7 +939,7 @@ export default async function MyPage() {
             </a>
 
             <a
-              href="#story"
+              href="/my/story"
               className="flex items-center gap-3 rounded-[15px] px-3 py-2.5 text-[#315A3F]/45 transition hover:bg-[#315A3F]/[0.045] hover:text-[#315A3F]"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-[11px]">
@@ -1360,204 +1364,53 @@ export default async function MyPage() {
             </div>
           </section>
 
-          {/* =================================================
-              JOURNEY + COLLECTION
-          ================================================== */}
+          
 
-          <section className="mt-3 grid gap-3 lg:grid-cols-[1fr_280px]">
-            {/* Journey */}
+<div className="mt-3 grid gap-3 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+  {/* COLLECTION */}
+  <div className="min-w-0">
+    <MyCollectionStamps />
+  </div>
 
-            <div className="rounded-[24px] bg-white p-5 shadow-[0_10px_35px_rgba(49,90,63,0.045)]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[8px] font-bold uppercase tracking-[0.17em] text-[#C69A45]">
-                    My Journey
-                  </p>
+  {/* =================================================
+    MY STORY
+================================================== */}
 
-                  <h2 className="mt-1 font-display text-[20px] tracking-[-0.04em] text-[#315A3F]">
-                    Your journey
-                  </h2>
-                </div>
+<section id="story" className="min-w-0">
+  <Link
+    href="/story"
+    className="flex items-center justify-between rounded-[24px] bg-white p-5 shadow-[0_10px_35px_rgba(49,90,63,0.045)] transition hover:-translate-y-0.5"
+  >
+    <div className="flex items-center gap-3">
+      <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[#EEE8DE] text-[#315A3F]">
+        <Icon name="story" size={16} />
+      </span>
 
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F1F4ED] text-[#315A3F]/40">
-                  <Icon name="map" size={14} />
-                </div>
-              </div>
+      <div>
+        <p className="text-[8px] font-bold uppercase tracking-[0.17em] text-[#C69A45]">
+          My Story
+        </p>
 
-              {journeyItems.length > 0 ? (
-                <div className="mt-5 max-h-[290px] overflow-y-auto pr-2">
-                  <div className="relative">
-                    <div className="absolute bottom-3 left-[13px] top-3 w-px bg-[#315A3F]/8" />
+        <p className="mt-0.5 text-[10px] text-[#315A3F]/40">
+          Your notes and reflections
+        </p>
+      </div>
+    </div>
 
-                    <div className="space-y-5">
-                      {journeyItems
-                        .slice()
-                        .reverse()
-                        .slice(0, 8)
-                        .map((item) => (
-                          <div
-                            key={item.id}
-                            className="relative flex gap-4"
-                          >
-                            <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E8EFE4] text-[#315A3F] ring-4 ring-white">
-                              <Icon
-                                name={
-                                  item.type ===
-                                  "activity"
-                                    ? "calendar"
-                                    : item.type ===
-                                      "community"
-                                    ? "users"
-                                    : item.type ===
-                                      "gallery"
-                                    ? "gallery"
-                                    : "spark"
-                                }
-                                size={12}
-                              />
-                            </div>
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F1F4ED] text-[#315A3F]/35">
+      <Icon name="chevron" size={14} />
+    </span>
+  </Link>
+</section>
 
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-[10px] font-semibold text-[#315A3F]">
-                                    {item.title}
-                                  </p>
+{/* TUTUP GRID COLLECTION + STORY */}
+</div>
 
-                                  <p className="mt-0.5 truncate text-[8px] text-[#315A3F]/30">
-                                    {item.description}
-                                  </p>
-                                </div>
+{/* =================================================
+    SMALL FOOTER
+================================================== */}
 
-                                <span className="shrink-0 text-[7px] font-semibold uppercase tracking-[0.08em] text-[#315A3F]/20">
-                                  {formatJourneyDate(
-                                    item.date
-                                  )}
-                                </span>
-                              </div>
-
-                              {item.points ? (
-                                <span className="mt-1.5 inline-flex rounded-full bg-[#F3E5C9] px-2 py-0.5 text-[7px] font-bold text-[#A2782F]">
-                                  +{item.points}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className="mt-5 text-[10px] text-[#315A3F]/30">
-                  Your journey will appear here.
-                </p>
-              )}
-            </div>
-
-            {/* Collection */}
-
-            <div
-              id="collection"
-              className="rounded-[24px] bg-[#E8EFE4] p-5"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[8px] font-bold uppercase tracking-[0.17em] text-[#C69A45]">
-                    Collection
-                  </p>
-
-                  <h2 className="mt-1 font-display text-[20px] tracking-[-0.04em] text-[#315A3F]">
-                    Festival stamps
-                  </h2>
-                </div>
-
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#315A3F]/40">
-                  <Icon name="collection" size={14} />
-                </span>
-              </div>
-
-              <div className="mt-6 grid grid-cols-3 gap-y-5">
-                <Stamp
-                  label="Arrival"
-                  active={checkIns.length >= 1}
-                  points={10}
-                />
-
-                <Stamp
-                  label="Explore"
-                  active={checkIns.length >= 2}
-                  points={10}
-                />
-
-                <Stamp
-                  label="Connect"
-                  active={myCommunities.length > 0}
-                  points={10}
-                />
-
-                <Stamp
-                  label="Activity"
-                  active={plan.length > 0}
-                  points={10}
-                />
-
-                <Stamp
-                  label="Moment"
-                  active={myGallery.length > 0}
-                  points={10}
-                />
-
-                <Stamp
-                  label="JCWF"
-                  active={checkIns.length >= 3}
-                  points={20}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================
-              MY STORY — COLLAPSED
-          ================================================== */}
-
-          <section
-            id="story"
-            className="mt-3"
-          >
-            <details className="group rounded-[24px] bg-white shadow-[0_10px_35px_rgba(49,90,63,0.045)]">
-              <summary className="flex cursor-pointer list-none items-center justify-between p-5">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[#EEE8DE] text-[#315A3F]">
-                    <Icon name="story" size={16} />
-                  </span>
-
-                  <div>
-                    <p className="text-[8px] font-bold uppercase tracking-[0.17em] text-[#C69A45]">
-                      My Story
-                    </p>
-
-                    <p className="mt-0.5 text-[10px] text-[#315A3F]/40">
-                      Your notes and reflections
-                    </p>
-                  </div>
-                </div>
-
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F1F4ED] text-[#315A3F]/35 transition group-open:rotate-90">
-                  <Icon name="chevron" size={14} />
-                </span>
-              </summary>
-
-              <div className="border-t border-[#315A3F]/5 p-5">
-                <MyStoryCard />
-              </div>
-            </details>
-          </section>
-
-          {/* =================================================
-              SMALL FOOTER
-          ================================================== */}
-
-          <footer className="mt-8 px-1">
+<footer className="mt-8 px-1">
             <div className="flex flex-col gap-1 text-[7px] uppercase tracking-[0.14em] text-[#315A3F]/20 sm:flex-row sm:items-center sm:justify-between">
               <span>
                 JCWF 2026 · Jogja Cultural Wellness Festival
@@ -1571,5 +1424,6 @@ export default async function MyPage() {
         </div>
       </div>
     </main>
-  );
+    
+ );
 }

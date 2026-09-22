@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-
 import AdminSidebar from "./AdminSidebar";
 
 export default function AdminShell({
@@ -11,7 +10,7 @@ export default function AdminShell({
 }) {
   return (
     <div className="min-h-screen bg-[#F7F3E8] text-[#17382A]">
-      <div className="flex min-h-screen">
+      <div className="min-h-screen lg:flex">
         {/* SIDEBAR */}
         <AdminSidebar />
 

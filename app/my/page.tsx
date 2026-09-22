@@ -1367,43 +1367,17 @@ export default async function MyPage() {
           
 
 <div className="mt-3 grid gap-3 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+
   {/* COLLECTION */}
   <div className="min-w-0">
     <MyCollectionStamps />
   </div>
 
-  {/* =================================================
-    MY STORY
-================================================== */}
+  {/* MY STORY */}
+  <div className="min-w-0">
+    <MyStoryCard />
+  </div>
 
-<section id="story" className="min-w-0">
-  <Link
-    href="/story"
-    className="flex items-center justify-between rounded-[24px] bg-white p-5 shadow-[0_10px_35px_rgba(49,90,63,0.045)] transition hover:-translate-y-0.5"
-  >
-    <div className="flex items-center gap-3">
-      <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[#EEE8DE] text-[#315A3F]">
-        <Icon name="story" size={16} />
-      </span>
-
-      <div>
-        <p className="text-[8px] font-bold uppercase tracking-[0.17em] text-[#C69A45]">
-          My Story
-        </p>
-
-        <p className="mt-0.5 text-[10px] text-[#315A3F]/40">
-          Your notes and reflections
-        </p>
-      </div>
-    </div>
-
-    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F1F4ED] text-[#315A3F]/35">
-      <Icon name="chevron" size={14} />
-    </span>
-  </Link>
-</section>
-
-{/* TUTUP GRID COLLECTION + STORY */}
 </div>
 
 {/* =================================================
